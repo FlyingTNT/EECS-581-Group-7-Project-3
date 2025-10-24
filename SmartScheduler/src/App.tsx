@@ -1,5 +1,6 @@
 import "./App.css";
 import HelloWorld from "./components/helloWorld";
+import Test from "./components/test";
 import { Button } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../src/redux/hooks";
 import type { RootState } from "./redux/store";
@@ -10,7 +11,12 @@ import {
 } from "./features/scheduleSlice";
 import type { Course } from "./types";
 
-function App() {
+interface AppProps
+{
+  num: number;
+}
+
+function App(props: AppProps) {
   const dispatch = useAppDispatch();
   const schedule = useAppSelector((state: RootState) => state.schedule);
   const newSection1: Course = {
@@ -29,7 +35,7 @@ function App() {
     times: ["Mon 10:00-11:00", "Wed 10:00-11:00"],
     description: "An introductory computer science course.",
   };
-
+  
   return (
     <>
       <div>SmartScheduler</div>
@@ -69,6 +75,9 @@ function App() {
           ))}
         </ul>
       </div>
+      <Test num = {props.num}/>
+      <Test num = {props.num * props.num}/>
+      <Test num = {props.num * props.num * props.num}/>
     </>
   );
 }

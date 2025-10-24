@@ -22,10 +22,11 @@ const scheduleSlice = createSlice({
     },
     clearSchedule(state) {
       state.sections = [];
-    },
+    }
   },
 });
 
+export type {ScheduleState};
 export const { addSection, removeSection, clearSchedule } =
   scheduleSlice.actions;
 export default scheduleSlice.reducer;
