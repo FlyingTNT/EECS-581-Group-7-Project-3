@@ -1,0 +1,27 @@
+.contentContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+  padding: 16px;
+}
+.searchAndSelected {
+  width: 40%;
+  height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+.scheduledAndUnsched {
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+}
+.searchBarContainer {
+  margin-bottom: 16px;
+  justify-self: center;
+}
+.selectedCoursesContainer {
+  height: 65vh;
+}
+.gridContainer {
+  height: 65vh;
+}

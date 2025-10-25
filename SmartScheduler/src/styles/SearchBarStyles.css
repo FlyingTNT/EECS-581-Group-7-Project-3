@@ -1,0 +1,11 @@
+.searchbar {
+  max-width: 400px;
+  justify-self: center;
+  width: 100%;
+}
+.snackbar {
+  background-color: rgb(232, 52, 52) !important;
+  color: rgb(255, 255, 255) !important;
+  justify-content: center;
+  border-radius: 12px !important;
+}
