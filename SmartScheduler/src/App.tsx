@@ -1,3 +1,11 @@
+/// App.tsx
+/// React component for the main application layout which included:
+/// Header, SearchBar, SelectedCourses, TotalCreditHours, Grid, and UnscheduledTable.
+/// Inputs: None
+/// Outputs: JSX.Element representing the app layout.
+/// Authors: Micheal Buckendahl
+/// Creation Date: 10/24/2025
+
 import Header from "./components/Header";
 import "../../SmartScheduler/src/styles/App.css";
 import { Divider } from "@mui/material";

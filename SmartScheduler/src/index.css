@@ -1,3 +1,7 @@
+/* Global styling applied to the entire application 
+   handles removal of any unwanted margins and paddings to the body
+   as well as setting the background color for the entire application 
+*/
 :root,
 html,
 body {
