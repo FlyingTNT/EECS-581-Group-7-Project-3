@@ -13,7 +13,7 @@ import type { ClassData } from "../types";
 import "../styles/SearchBarStyles.css";
 import { useAppSelector } from "../redux/hooks";
 import { fetchCourses } from "../utils/getCourses";
-import {parseHTMLResponse, deepCopyClass} from "../utils/Utilities";
+import {parseHTMLResponse} from "../utils/Utilities";
 
 export default function SearchBar() {
   const dispatch = useDispatch(); // Redux dispatch function
@@ -132,12 +132,8 @@ export default function SearchBar() {
               setSnackbarMessage("Course already selected.");
               setIsSnackBarOpen(true);
             } else {
-              // Need to deep copy the class to avoid a call stack overflow
-              const copy = deepCopyClass(value as ClassData);
-
-              // Add the selected course to the selected courses list
               dispatch(
-                  addCourse(copy)
+                  addCourse(value as ClassData)
               );
             }
             setInputValue(""); // Clear the text field after a selection

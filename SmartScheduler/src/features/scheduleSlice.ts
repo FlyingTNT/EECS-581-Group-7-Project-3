@@ -22,6 +22,7 @@ const scheduleSlice = createSlice({
   reducers: {
     addCourse(state, action: PayloadAction<ClassData>) {
       state.selectedClasses.push(action.payload);
+      console.log("Added class:", action.payload);
     },
     removeCourse(state, action: PayloadAction<string>) {
       state.selectedClasses = state.selectedClasses.filter((s) => s.id !== action.payload);

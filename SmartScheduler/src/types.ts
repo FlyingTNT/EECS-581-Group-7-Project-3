@@ -16,10 +16,11 @@ export interface ClassData
 
 export interface SectionData
 {
-  class: ClassData,
+  classId: string,
   sectionNumber: number
   instructor: string,
-  credits: number,
+  minCredits: number,
+  maxCredits: number,
   topic: string,
   type: string,
   location: string,

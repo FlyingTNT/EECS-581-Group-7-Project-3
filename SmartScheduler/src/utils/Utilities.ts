@@ -60,7 +60,25 @@ function parseClass(elements: Array<HTMLTableRowElement>, index: number): ClassD
     const openPns: number = nameString.lastIndexOf("(");
     const closePns: number = nameString.lastIndexOf(")");
 
-    const className = nameString.substring(0, openPns).trim();
+    const qualifiedClassName = nameString.substring(0, openPns).trim();
+
+    let className = "";
+
+    const splitClassName = qualifiedClassName.split("-");
+
+    if(splitClassName.length <= 1)
+    {
+        className = qualifiedClassName;
+    }
+    else
+    {
+        className = splitClassName[1].trim();
+
+        for(let i = 2; i < splitClassName.length; i++)
+        {
+            className += " - " + splitClassName[i].trim();
+        }
+    }
 
     const creditRange = nameString.substring(openPns + 1, closePns).split("-");
 
@@ -153,7 +171,11 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
     const sectionType = getText(row0Elements[0]).trim().toUpperCase();
     const instructor = row0Elements[1].getElementsByTagName("a")[0]?.text?.trim() ?? "No assigned instructor";
     const topic = getText(row0Elements[1]).replaceAll("Topic:", "").trim();
-    const creditHours = parseInt(getText(row0Elements[2]).trim());
+
+    const creditRange = getText(row0Elements[2]).trim().split("-");
+    const minCreditHours = parseInt(creditRange[0].trim());
+    const maxCreditHours = parseInt(creditRange.length > 1 ? creditRange[1].trim() : creditRange[0].trim());
+
     const sectionNumber = parseInt(getText(row0Elements[3].getElementsByTagName("strong")[0]));
     const openSeats = parseInt(getText(row0Elements[4].getElementsByTagName("span")[0]));
 
@@ -243,10 +265,11 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
     }
 
     return {
-        class: parentClass,
+        classId: parentClass.id,
         sectionNumber: sectionNumber,
         instructor: instructor,
-        credits: creditHours,
+        minCredits: minCreditHours,
+        maxCredits: maxCreditHours,
         topic: topic,
         type: sectionType,
         location: location,
@@ -255,7 +278,7 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
     }
 }
 
-function parseTime(timeString: string): number
+export function parseTime(timeString: string): number
 {
     timeString = timeString.trim().toLowerCase();
 
@@ -275,7 +298,7 @@ function parseTime(timeString: string): number
     return hour * 12 + Math.floor(minute / 5);
 }
 
-function unparseTime(time: number): string
+export function unparseTime(time: number): string
 {
     let am = time < 144;
     if(!am)
@@ -335,64 +358,4 @@ function getText(element: HTMLElement, onlyFirst: boolean = false): string
     }
 
     return text;
-}
-
-export function deepCopyClass(classData: ClassData): ClassData
-{
-    const out = {
-        id: String(classData.id),
-        name: String(classData.name),
-        description: String(classData.description),
-        minCredits: Number(classData.minCredits),
-        maxCredits: Number(classData.maxCredits),
-        lectures: [] as SectionData[],
-        labs: [] as SectionData[],
-        discussions: [] as SectionData[],
-        pinnedLab: Number(classData.pinnedLab),
-        pinnedLecture: Number(classData.pinnedLecture),
-        pinnedDiscussion: Number(classData.pinnedDiscussion),
-        color: String(classData.color)
-    };
-
-    // It is necessary to do this rather than using the .map function or you'll get a exception. I could not possibly tell you why.
-    for(let i = 0; i < out.lectures.length; i++)
-    {
-        out.lectures.push(deepCopySection(classData.lectures[i], out))
-    }
-
-    for(let i = 0; i < out.labs.length; i++)
-    {
-        out.labs.push(deepCopySection(classData.labs[i], out))
-    }
-
-    for(let i = 0; i < out.discussions.length; i++)
-    {
-        out.discussions.push(deepCopySection(classData.discussions[i], out))
-    }
-
-    return out;
-}
-
-export function deepCopySection(sectionData: SectionData, ownerClass: ClassData): SectionData
-{
-    return {
-        class: ownerClass,
-        sectionNumber: Number(sectionData.sectionNumber),
-        instructor: String(sectionData.instructor),
-        credits: Number(sectionData.credits),
-        topic: String(sectionData.topic),
-        type: String(sectionData.type),
-        location: String(sectionData.location),
-        openSeats: Number(sectionData.openSeats),
-        times: sectionData.times.map(time => deepCopyTime(time))
-    };
-}
-
-export function deepCopyTime(timeData: ScheduledTime): ScheduledTime
-{
-    return {
-        day: Number(timeData.day),
-        startTime: Number(timeData.startTime),
-        endTime: Number(timeData.endTime),
-    };
 }
