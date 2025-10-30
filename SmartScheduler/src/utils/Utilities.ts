@@ -60,7 +60,25 @@ function parseClass(elements: Array<HTMLTableRowElement>, index: number): ClassD
     const openPns: number = nameString.lastIndexOf("(");
     const closePns: number = nameString.lastIndexOf(")");
 
-    const className = nameString.substring(0, openPns).trim();
+    const qualifiedClassName = nameString.substring(0, openPns).trim();
+
+    let className = "";
+
+    const splitClassName = qualifiedClassName.split("-");
+
+    if(splitClassName.length <= 1)
+    {
+        className = qualifiedClassName;
+    }
+    else
+    {
+        className = splitClassName[1].trim();
+
+        for(let i = 2; i < splitClassName.length; i++)
+        {
+            className += " - " + splitClassName[i].trim();
+        }
+    }
 
     const creditRange = nameString.substring(openPns + 1, closePns).split("-");
 
