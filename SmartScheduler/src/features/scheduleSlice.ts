@@ -1,31 +1,37 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { Course } from "../types";
+import type { ClassData, SectionData } from "../types";
 
 type ScheduleState = {
-  sections: Course[];
+  selectedClasses: ClassData[],
+  permutations: SectionData[][],
+  currentPermutation: number,
+  blockedTimes: boolean[][]
 };
 
 const initialState: ScheduleState = {
-  sections: [],
+  selectedClasses: [],
+  permutations: [],
+  currentPermutation: -1,
+  blockedTimes: []
 };
 
 const scheduleSlice = createSlice({
   name: "schedule",
   initialState,
   reducers: {
-    addSection(state, action: PayloadAction<Course>) {
-      state.sections.push(action.payload);
+    addCourse(state, action: PayloadAction<ClassData>) {
+      state.selectedClasses.push(action.payload);
     },
-    removeSection(state, action: PayloadAction<string>) {
-      state.sections = state.sections.filter((s) => s.id !== action.payload);
+    removeCourse(state, action: PayloadAction<string>) {
+      state.selectedClasses = state.selectedClasses.filter((s) => s.id !== action.payload);
     },
     clearSchedule(state) {
-      state.sections = [];
+      state.selectedClasses = [];
     },
   },
 });
 
-export const { addSection, removeSection, clearSchedule } =
+export const { addCourse, removeCourse, clearSchedule } =
   scheduleSlice.actions;
 export default scheduleSlice.reducer;

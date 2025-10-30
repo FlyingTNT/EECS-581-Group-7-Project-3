@@ -7,36 +7,25 @@
 
 import { Autocomplete, Snackbar, TextField } from "@mui/material";
 import { useState } from "react";
-import { addSection } from "../features/scheduleSlice";
+import { addCourse } from "../features/scheduleSlice";
 import { useDispatch } from "react-redux";
-import type { Course } from "../types";
+import type { ClassData } from "../types";
 import "../styles/SearchBarStyles.css";
 import { useAppSelector } from "../redux/hooks";
 import { fetchCourses } from "../utils/getCourses";
+import {parseHTMLResponse, deepCopyClass} from "../utils/Utilities";
 
 export default function SearchBar() {
   const dispatch = useDispatch(); // Redux dispatch function
 
-  // Fake course data for testing purposes, remove later
-  const fakeCourses = [
-    "Introduction to Computer Science",
-    "Data Structures and Algorithms",
-    "Operating Systems",
-    "Database Management systems",
-    "EECS 581",
-    "EECS 582",
-    "EECS 443",
-    "EECS 447",
-  ];
-
   // Grab the selected courses from the Redux store
-  const selectedCourses = useAppSelector((state) => state.schedule.sections);
+  const selectedCourses = useAppSelector((state) => state.schedule.selectedClasses);
 
   // Local state variables to control different aspects of the search bar like
   // dropdown visibility, course options, loading state, input value, snackbar state,
   // and the snackbar message.
   const [isDropDownOpen, setIsDropdownOpen] = useState(false);
-  const [courses, setCourses] = useState<string[]>([]);
+  const [courses, setCourses] = useState<ClassData[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSnackBarOpen, setIsSnackBarOpen] = useState(false);
@@ -48,14 +37,20 @@ export default function SearchBar() {
   };
 
   // Use the fetchCourses utility to get the courses from the backend
-  async function handleSearch(text: string) {
+  async function handleSearch(text: string) : Promise<ClassData[]>
+  {
     try {
       const html = await fetchCourses(text);
-      console.log("Server returned HTML:", html);
+
+      return parseHTMLResponse(html);
+
+      //console.log("Server returned HTML:", html);
       // TODO: parse the HTML to extract course data
     } catch (err) {
       console.error(err);
     }
+
+    return [];
   }
 
   const handleKeyDown = async (event: React.KeyboardEvent) => {
@@ -80,21 +75,17 @@ export default function SearchBar() {
       }
 
       // Call the backend to search for courses
-      await handleSearch(searchKeyWord);
-
-      // For now since we dont have a util function to parse the HTML from the backend, for a POC
-      // we will just filter through the fakeCourses array to simulate search results.
-      const coursesFound = fakeCourses.filter((course) =>
-        course.toLowerCase().includes(searchKeyWord.toLowerCase())
-      );
+      const returnedClasses = await handleSearch(searchKeyWord);
 
       // If no courses were found, we want to notify the user of that via a snackbar message
-      if (coursesFound.length === 0) {
+      if (returnedClasses.length === 0) {
         setSnackbarMessage("No courses found matching that search.");
         setIsSnackBarOpen(true);
         // Otherwise set the courses found to be the courses state variable
-      } else {
-        setCourses(coursesFound);
+      }
+      else
+      {
+        setCourses(returnedClasses);
       }
 
       // Now that we have found and displayed the results, set loading back to false
@@ -108,6 +99,7 @@ export default function SearchBar() {
         className="searchbar"
         freeSolo // allow free text input
         value={null} // keep value controlled by inputValue and state for safety
+        getOptionLabel={course => (course as ClassData).id} // Only show the course ids
         options={courses} // options are the courses found from the search
         open={isDropDownOpen} // we need to control when the dropdown is shown so we show results when we have them
         loading={isLoading} // Because we have a backend call we need to handle the situation when the call might take some time
@@ -134,15 +126,18 @@ export default function SearchBar() {
           // from the dropdown
           if (reason === "selectOption") {
             if (value === null) return;
-            else if (isAlreadySelected(value)) {
+            else if (isAlreadySelected((value as ClassData).id)) {
               // The selected course is already in the list
               console.log(selectedCourses);
               setSnackbarMessage("Course already selected.");
               setIsSnackBarOpen(true);
             } else {
+              // Need to deep copy the class to avoid a call stack overflow
+              const copy = deepCopyClass(value as ClassData);
+
               // Add the selected course to the selected courses list
               dispatch(
-                addSection({ id: String(value), name: String(value) } as Course)
+                  addCourse(copy)
               );
             }
             setInputValue(""); // Clear the text field after a selection
