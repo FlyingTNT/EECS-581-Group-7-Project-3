@@ -44,7 +44,7 @@ function parseClass(elements: Array<HTMLTableRowElement>, index: number): ClassD
 {
     const nameRow = elements[index];
 
-    const classCode = nameRow.getElementsByTagName("h3")[0].textContent.replace(/\s+/, " ");
+    const classCode = compressSpaces(nameRow.getElementsByTagName("h3")[0].textContent);
 
     const ns = nameRow.getElementsByTagName("td")[0];
 
@@ -85,7 +85,7 @@ function parseClass(elements: Array<HTMLTableRowElement>, index: number): ClassD
     const minCreditHours = parseInt(creditRange[0].trim());
     const maxCreditHours = parseInt(creditRange.length > 1 ? creditRange[1].trim() : creditRange[0].trim());
 
-    const term = nameString.substring(closePns + 1, nameString.length).trim();
+    const term = compressSpaces(nameString.substring(closePns + 1, nameString.length).trim());
 
     //console.log("Code:", classCode);
     //console.log("Name:", className);
@@ -94,7 +94,7 @@ function parseClass(elements: Array<HTMLTableRowElement>, index: number): ClassD
     
     const descriptionElement = elements[index + 1].getElementsByTagName("td")[0];
 
-    const descriptionString: string = getText(descriptionElement, true);
+    const descriptionString: string = compressSpaces(getText(descriptionElement, true));
 
     //console.log("Description:", descriptionString);
 
@@ -104,12 +104,7 @@ function parseClass(elements: Array<HTMLTableRowElement>, index: number): ClassD
         description: descriptionString,
         minCredits: minCreditHours,
         maxCredits: maxCreditHours,
-        lectures: [],
-        labs: [],
-        discussions: [],
-        pinnedLab: -1,
-        pinnedLecture: -1,
-        pinnedDiscussion: -1,
+        sections: {},
         color: "FFFFFF"
     }
 
@@ -119,20 +114,12 @@ function parseClass(elements: Array<HTMLTableRowElement>, index: number): ClassD
 
     for(let i = 0; i < sections.length; i++)
     {
-        const section: SectionData = sections[i];
+        if(!(sections[i].type in parsedClass.sections))
+        {
+            parsedClass.sections[sections[i].type] = [];
+        }
 
-        if(section.type == "LBN")
-        {
-            parsedClass.labs.push(section);
-        }
-        else if(section.type == "LEC")
-        {
-            parsedClass.lectures.push(section);
-        }
-        else if(section.type == "DIS")
-        {
-            parsedClass.discussions.push(section);
-        }
+        parsedClass.sections[sections[i].type].push(sections[i]);
     }
 
     return parsedClass;
@@ -169,15 +156,20 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
     const row1Elements = row1.getElementsByTagName("td");
 
     const sectionType = getText(row0Elements[0]).trim().toUpperCase();
-    const instructor = row0Elements[1].getElementsByTagName("a")[0]?.text?.trim() ?? "No assigned instructor";
-    const topic = getText(row0Elements[1]).replaceAll("Topic:", "").trim();
+    const instructor = compressSpaces(row0Elements[1].getElementsByTagName("a")[0]?.text?.trim() ?? "No assigned instructor");
+    const topic = compressSpaces(getText(row0Elements[1]).replaceAll("Topic:", "").trim());
 
     const creditRange = getText(row0Elements[2]).trim().split("-");
     const minCreditHours = parseInt(creditRange[0].trim());
     const maxCreditHours = parseInt(creditRange.length > 1 ? creditRange[1].trim() : creditRange[0].trim());
 
     const sectionNumber = parseInt(getText(row0Elements[3].getElementsByTagName("strong")[0]));
-    const openSeats = parseInt(getText(row0Elements[4].getElementsByTagName("span")[0]));
+    let openSeats = parseInt(getText(row0Elements[4].getElementsByTagName("span")[0]));
+
+    if(isNaN(openSeats))
+    {
+        openSeats = 0;
+    }
 
     //console.log("Type:", sectionType);
     //console.log("Instructor:", instructor);
@@ -192,6 +184,12 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
 
     let days: number[] = []
     
+    if(timeAndLocationString.startsWith("Su"))
+    {
+        days.push(0);
+        timeAndLocationString = timeAndLocationString.substring(2).trimStart();
+    }
+
     if(timeAndLocationString.startsWith("M"))
     {
         days.push(1);
@@ -222,6 +220,18 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
         timeAndLocationString = timeAndLocationString.substring(1).trimStart();
     }
 
+    if(timeAndLocationString.startsWith("Sa"))
+    {
+        days.push(6);
+        timeAndLocationString = timeAndLocationString.substring(2).trimStart();
+    }
+
+    if(timeAndLocationString.startsWith("Su"))
+    {
+        days.push(0);
+        timeAndLocationString = timeAndLocationString.substring(2).trimStart();
+    }
+
     //console.log("Days:", days);
 
     const online = timeAndLocationString.toLowerCase().includes("onlin"); // "onlin" is intended
@@ -248,7 +258,7 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
 
     const spans = row1Elements[1].getElementsByTagName("span");
 
-    const location = spans.length == 0 ? "No location" : getText(spans[0]).trim();
+    const location = spans.length == 0 ? "No location" : compressSpaces(getText(spans[0]).trim());
     //console.log("Location:", location);
 
     let times: ScheduledTime[] = [];
@@ -274,7 +284,8 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
         type: sectionType,
         location: location,
         openSeats: openSeats,
-        times: times
+        times: times,
+        pinned: false
     }
 }
 
@@ -358,4 +369,14 @@ function getText(element: HTMLElement, onlyFirst: boolean = false): string
     }
 
     return text;
+}
+
+/**
+ * Replaces any double-spaces or other whitespace characters in the given string with single spaces.
+ * @param text The text to remove double-spaces from.
+ * @returns The input text with double-spaces and other whitespace characters replaced with single spaces.
+ */
+function compressSpaces(text: string): string
+{
+    return text.replaceAll(/\s+/g, " ");
 }
