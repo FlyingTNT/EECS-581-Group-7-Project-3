@@ -11,8 +11,8 @@ type ScheduleState = {
   currentPermutation: number,
 
   /** The times that the user has blocked classes from occuring at.
-   * The first index is the day of the week and the second is the time of the day, in 15-minute increments from 12:00am. 
-   * i.e. blockedTimes[2][3] would refer to Tuesday (2) at 12:45am (3)
+   * The first index is the day of the week and the second is the time of the day, in 30-minute increments from 12:00am. 
+   * i.e. blockedTimes[2][3] would refer to Tuesday (2) at 1:30am (3)
    */
   blockedTimes: boolean[][]
 };
