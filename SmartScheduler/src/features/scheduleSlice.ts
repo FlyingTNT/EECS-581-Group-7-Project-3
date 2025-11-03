@@ -43,4 +43,5 @@ const scheduleSlice = createSlice({
 
 export const { addCourse, removeCourse, clearSchedule } =
   scheduleSlice.actions;
+export { type ScheduleState }
 export default scheduleSlice.reducer;

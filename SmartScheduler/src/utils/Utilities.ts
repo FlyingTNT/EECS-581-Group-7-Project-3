@@ -7,13 +7,15 @@
  */
 
 import {type ClassData, type SectionData, type ScheduledTime} from "../types";
+import {type ScheduleState} from "../features/scheduleSlice";
+import { useAppSelector } from "../redux/hooks";
 
 /**
  * Parses a list of ClassData from the given html string returned by the classes.ku.edu api
  * @param html A html string in the format returned by the classes.ku.edu api
  * @returns The list of ClassData parsed from the given string
  */
-export function parseHTMLResponse(html: string): ClassData[]
+function parseHTMLResponse(html: string): ClassData[]
 {
     // Parse a HTML document from the given string
     const document = new DOMParser().parseFromString(html, "text/html");
@@ -361,7 +363,7 @@ function parseSection(elements: HTMLTableRowElement[], index: number, parentClas
  * @param timeString A string in the form: hh:mm {am/pm}
  * @returns An integer of the number of 5-minute intervals after 12:00 am, or -1 if the given string is in a bad format
  */
-export function parseTime(timeString: string): number
+function parseTime(timeString: string): number
 {
     // Trim any whitespace and normalize the string to lowercase
     timeString = timeString.trim().toLowerCase();
@@ -396,7 +398,7 @@ export function parseTime(timeString: string): number
  * @param time The number of 5-minute intervals after 12:00 am
  * @returns A string represencation of the time, in the form hh:mm {AM/PM}
  */
-export function unparseTime(time: number): string
+function unparseTime(time: number): string
 {
     // If we are less than 144 5-minutes after 12:00am, it is still am
     const am = time < 144;
@@ -493,3 +495,32 @@ function compressSpaces(text: string): string
 {
     return text.replaceAll(/\s+/g, " ");
 }
+
+/**
+ * Gets the current global state of the scheduler.
+ * @returns The current global state of the scheduler.
+ */
+function getState(): ScheduleState
+{
+    return useAppSelector((state) => state.schedule);
+}
+
+/**
+ * Get the selected class associated with with the given section or id.
+ * @param idOrSection The section or class id to get the class associated with
+ * @param state The current global state. If in a component, this is unnecessary, but it needs to be provided if calling from one of the slice functions.
+ * @returns The selected class associated with the given class id, or null if no such class exists.
+ */
+function getClass(idOrSection: string | SectionData, state: ScheduleState | null = null): ClassData | null
+{
+    // Get the id from the section if passed a SectionData, or else just use the given string
+    const id = typeof idOrSection === "string" ? idOrSection : idOrSection.classId;
+
+    // If the given state was null, get the current state
+    state ??= getState();
+
+    // Return the first class with a matching id, or null if none was found
+    return state.selectedClasses.find(c => c.id === id) ?? null;
+}
+
+export {getClass, getState, parseHTMLResponse, parseTime, unparseTime};
