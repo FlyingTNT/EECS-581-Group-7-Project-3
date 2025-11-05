@@ -9,5 +9,5 @@ import "../styles/HeaderStyles.css";
 
 // A very simple div that is styled to be a header bar with the application name.
 export default function Header() {
-  return <div className="header">SmartScheduler</div>;
+  return <div className="appHeader">SmartScheduler</div>;
 }

@@ -1,0 +1,13 @@
+.coursesContainer {
+  max-height: 380px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.courseList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

@@ -1,0 +1,32 @@
+.classCardContainer {
+  border-radius: 12px;
+  padding: 10px;
+}
+.cardContent,
+.cardHeader {
+  color: #ffffff;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.removeButton,
+.dropDownButton {
+  color: #ffffff;
+  font-size: 20px;
+  cursor: pointer;
+  align-items: flex-end;
+  display: flex;
+}
+.cardExtraContent {
+  margin-top: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sectionDisplay {
+  display: flex;
+  flex-direction: column;
+  font-size: 13px;
+}
