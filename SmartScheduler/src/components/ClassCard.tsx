@@ -41,10 +41,34 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
   // Simple state that will handle if the dropdown of extra content is being displayed or not
   const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
-  // Each classData object has these different lists of sections so here we are just pulling it out of the object
-  const lecSections = currCourse.sections["LEC"];
-  const labSections = currCourse.sections["LBN"];
-  const DiscussionSections = currCourse.sections["DIS"];
+  // choose preferred order for common types, others render after
+  const preferredOrder = ["LEC", "LBN", "DIS"];
+  const sectionTypes = Object.keys(currCourse.sections || {}) as string[];
+  const sortedSectionTypes = [
+    ...preferredOrder.filter((t) => sectionTypes.includes(t)),
+    ...sectionTypes.filter((t) => !preferredOrder.includes(t)),
+  ];
+
+  const SECTION_TYPE_LABELS: Record<string, string> = {
+    ACT: "Activity",
+    CLN: "Clinical",
+    CON: "Continuance",
+    DIS: "Discussion",
+    DSO: "Discussion (Optional)",
+    EXT: "External",
+    FLD: "Field Studies",
+    IND: "Independent Study",
+    LAB: "Laboratory (Main)",
+    LBN: "Laboratory",
+    LEC: "Lecture",
+    PRA: "Practicum",
+    RSC: "Research",
+    RSH: "Individual Research",
+    SEM: "Seminar",
+    SUP: "Supervision",
+    THE: "Thesis/Dissertation",
+    TUT: "Tutorial",
+  };
 
   const days = ["M", "Tu", "W", "Tr", "F"]; // List that we will use to turn numbers to correct day abreviation
 
@@ -91,31 +115,34 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
         <div className="sectionDisplay">
           <div className="sectionDisplay">
             {/** Grab the selected section for each type from the current permutation */}
-            {(["LEC", "LBN", "DIS"] as const).map((t) => {
-              const sel = currPermutation?.find(
-                (sec: SectionData) =>
-                  sec.classId === currCourse.id && sec.type === t
-              );
-              if (!sel) return null; // if this type isn't selected in the permutation, don't render it
+            {(() => {
+              const selectedSecs: SectionData[] = (
+                currPermutation ?? []
+              ).filter((sec: SectionData) => sec.classId === currCourse.id);
 
-              const label =
-                t === "LEC" ? "LEC:" : t === "LBN" ? "LAB:" : "DIS:";
-
+              if (selectedSecs.length === 0) return null;
               return (
-                <div
-                  className={
-                    t === "LEC"
-                      ? "currSectionLec"
-                      : t === "LBN"
-                      ? "currSectionLab"
-                      : "currSectionDis"
-                  }
-                  key={sectionKey(t, { sectionNumber: sel.sectionNumber })}
-                >
-                  {label} <TimesList times={sel.times} />
+                <div className="selectedSectionsList">
+                  <ul className="sectionList">
+                    {selectedSecs.map((sec) => (
+                      <li className="sectionItem" key={sectionKey("SEL", sec)}>
+                        <div className="sectionHeader">
+                          Section {sec.sectionNumber}
+                        </div>
+                        {/* show times or fallback text */}
+                        {(sec.times ?? []).length > 0 ? (
+                          <TimesList times={sec.times} />
+                        ) : (
+                          <ul className="timesList">
+                            <li>This has no scheduled time</li>
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               );
-            })}
+            })()}
           </div>
         </div>
         <div
@@ -128,97 +155,36 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
       {isDropDownOpen && (
         <div className="cardExtraContent">
           <div className="description">{currCourse.description} </div>
-          {/* Lectures */}
-          {(lecSections ?? []).length > 0 && (
-            <div className="lecList">
-              <div className="sectionTypeLabel">lectures:</div>
-              {/* This creates a list of all the possible sections for this calss */}
-              <ul className="sectionList">
-                {(lecSections ?? []).map((sec) => (
-                  <li className="sectionItem" key={sectionKey("LEC", sec)}>
-                    <div className="sectionHeader">
-                      Section {sec.sectionNumber}
-                    </div>
-                    {/* This then creates a list for all the times for that section */}
-                    <ul className="timesList">
+          {/* Render every section type dynamically */}
+          {sortedSectionTypes.map((type) => {
+            const secs = currCourse.sections[type] ?? [];
+            if (secs.length === 0) return null;
+
+            const typeLabel = SECTION_TYPE_LABELS[type];
+
+            return (
+              <div className={`${type.toLowerCase()}List`} key={type}>
+                <div className="sectionTypeLabel">{typeLabel}:</div>
+                <ul className="sectionList">
+                  {secs.map((sec) => (
+                    <li className="sectionItem" key={sectionKey(type, sec)}>
+                      <div className="sectionHeader">
+                        Section {sec.sectionNumber}
+                      </div>
+                      {/* show times or fallback text */}
                       {(sec.times ?? []).length > 0 ? (
-                        sec.times.map((t) => (
-                          // the times get parsed into ints that need to be unparsed to get the normal times
-                          // so here we are unparsing the times. As well as using that list to get from a a int
-                          // to a week abreviation.
-                          <li key={timeKey(t)}>
-                            {days[t.day - 1] ?? t.day}{" "}
-                            {unparseTime(t.startTime)} -{" "}
-                            {unparseTime(t.endTime)}
-                          </li>
-                        ))
+                        <TimesList times={sec.times} />
                       ) : (
-                        // There are cases where something doesnt have a scheduled time for that section so we just
-                        // simply display that to the user
-                        <li>This has no scheduled time</li>
+                        <ul className="timesList">
+                          <li>This has no scheduled time</li>
+                        </ul>
                       )}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {/* Labs */}
-          {(labSections ?? []).length > 0 && (
-            <div className="labList">
-              <div className="sectionTypeLabel">labs:</div>
-              <ul className="sectionList">
-                {(labSections ?? []).map((sec) => (
-                  <li className="sectionItem" key={sectionKey("LBN", sec)}>
-                    <div className="sectionHeader">
-                      Section {sec.sectionNumber}
-                    </div>
-                    <ul className="timesList">
-                      {(sec.times ?? []).length > 0 ? (
-                        sec.times.map((t) => (
-                          <li key={timeKey(t)}>
-                            {days[t.day - 1] ?? t.day}{" "}
-                            {unparseTime(t.startTime)} -{" "}
-                            {unparseTime(t.endTime)}
-                          </li>
-                        ))
-                      ) : (
-                        <li>This has no scheduled time</li>
-                      )}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-          {/* Discussions */}
-          {(DiscussionSections ?? []).length > 0 && (
-            <div className="discussionList">
-              <div className="sectionTypeLabel">discussion:</div>
-              <ul className="sectionList">
-                {(DiscussionSections ?? []).map((sec) => (
-                  <li className="sectionItem" key={sectionKey("DIS", sec)}>
-                    <div className="sectionHeader">
-                      Section {sec.sectionNumber}
-                    </div>
-                    <ul className="timesList">
-                      {(sec.times ?? []).length > 0 ? (
-                        sec.times.map((t) => (
-                          <li key={timeKey(t)}>
-                            {days[t.day - 1] ?? t.day}{" "}
-                            {unparseTime(t.startTime)} -{" "}
-                            {unparseTime(t.endTime)}
-                          </li>
-                        ))
-                      ) : (
-                        <li>This has no scheduled time</li>
-                      )}
-                    </ul>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
