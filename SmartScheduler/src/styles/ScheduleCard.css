@@ -1,0 +1,22 @@
+/* src/styles/ScheduleCard.css */
+
+.schedule-card {
+  padding: 8px;
+  border-radius: 4px;
+  margin: 4px 0;
+  color: #fff;
+  font-weight: bold;
+  text-align: center;
+}
+
+.schedule-card-name {
+  font-size: 1.1em;
+}
+
+.schedule-card-location {
+  font-size: 0.9em;
+}
+
+.schedule-card-time {
+  font-size: 0.8em;
+}
