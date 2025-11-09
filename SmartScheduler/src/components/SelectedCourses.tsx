@@ -9,6 +9,8 @@ import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import type { ClassData } from "../types";
 import { generateSchedules } from "../utils/scheduleAlgorithm";
 import { setGeneratedSchedules } from "../features/scheduleAlgorithmSlice";
+import "../styles/SelectedCoursesStyles.css";
+import ClassCard from "./ClassCard";
 
 export default function SelectedCourses() {
   const dispatch = useAppDispatch();
@@ -28,18 +30,17 @@ export default function SelectedCourses() {
     console.log(" Generated schedules:", generated);
     dispatch(setGeneratedSchedules(generated));
   }, [selectedCourses, dispatch]);
-
   return (
     <>
       <li>Selected Courses:</li>
-      <ul>
-        {/* Map through the selected courses and display them here */}
-        {selectedCourses.map((course: ClassData) => (
-          <li key={course.id}>{course.name}</li>
-        ))}
-      </ul>
-
-
+      <div className="coursesContainer">
+        <ul className="courseList">
+          {/* Map through the selected courses and display them here using the classCard component */}
+          {selectedCourses.map((course: ClassData) => (
+            <ClassCard currCourse={course} />
+          ))}
+        </ul>
+      </div>
     </>
   );
 }

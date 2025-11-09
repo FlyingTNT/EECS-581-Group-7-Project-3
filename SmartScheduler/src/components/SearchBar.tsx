@@ -13,13 +13,16 @@ import type { ClassData } from "../types";
 import "../styles/SearchBarStyles.css";
 import { useAppSelector } from "../redux/hooks";
 import { fetchCourses } from "../utils/getCourses";
-import {parseHTMLResponse} from "../utils/Utilities";
+import { parseHTMLResponse } from "../utils/Utilities";
+import getCourseColor from "../utils/getCourseColor";
 
 export default function SearchBar() {
   const dispatch = useDispatch(); // Redux dispatch function
 
   // Grab the selected courses from the Redux store
-  const selectedCourses = useAppSelector((state) => state.schedule.selectedClasses);
+  const selectedCourses = useAppSelector(
+    (state) => state.schedule.selectedClasses
+  );
 
   // Local state variables to control different aspects of the search bar like
   // dropdown visibility, course options, loading state, input value, snackbar state,
@@ -37,8 +40,7 @@ export default function SearchBar() {
   };
 
   // Use the fetchCourses utility to get the courses from the backend
-  async function handleSearch(text: string) : Promise<ClassData[]>
-  {
+  async function handleSearch(text: string): Promise<ClassData[]> {
     try {
       const html = await fetchCourses(text);
 
@@ -82,9 +84,7 @@ export default function SearchBar() {
         setSnackbarMessage("No courses found matching that search.");
         setIsSnackBarOpen(true);
         // Otherwise set the courses found to be the courses state variable
-      }
-      else
-      {
+      } else {
         setCourses(returnedClasses);
       }
 
@@ -99,7 +99,7 @@ export default function SearchBar() {
         className="searchbar"
         freeSolo // allow free text input
         value={null} // keep value controlled by inputValue and state for safety
-        getOptionLabel={course => (course as ClassData).id} // Only show the course ids
+        getOptionLabel={(course) => (course as ClassData).id} // Only show the course ids
         options={courses} // options are the courses found from the search
         open={isDropDownOpen} // we need to control when the dropdown is shown so we show results when we have them
         loading={isLoading} // Because we have a backend call we need to handle the situation when the call might take some time
@@ -126,15 +126,21 @@ export default function SearchBar() {
           // from the dropdown
           if (reason === "selectOption") {
             if (value === null) return;
+            // freeSolo allows the value to be a string; guard against that here
+            if (typeof value === "string") return;
             else if (isAlreadySelected((value as ClassData).id)) {
               // The selected course is already in the list
               console.log(selectedCourses);
               setSnackbarMessage("Course already selected.");
               setIsSnackBarOpen(true);
             } else {
-              dispatch(
-                  addCourse(value as ClassData)
-              );
+              // Ensure we treat the selected option as ClassData, set its color, and dispatch
+              const selectedClass = value as ClassData;
+              const classToAdd: ClassData = {
+                ...selectedClass,
+                color: getCourseColor(selectedCourses),
+              };
+              dispatch(addCourse(classToAdd));
             }
             setInputValue(""); // Clear the text field after a selection
             setIsDropdownOpen(false); // Close dropdown
