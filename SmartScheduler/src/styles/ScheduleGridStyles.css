@@ -1,1 +1,28 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: 100px repeat(5, 1fr);
+  border: 1px solid #ccc;
+  text-align: center;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.grid-cell {
+  border: 1px solid #ddd;
+  height: 5vh;
+  width: 100%;
+  min-height: 40px;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.grid-header {
+  background-color: #f0f0f0;
+}
+
+.grid-time-cell {
+  background-color: #fafafa;
+}
 
