@@ -7,10 +7,12 @@
 
 import { configureStore } from "@reduxjs/toolkit";
 import scheduleReducer from "../features/scheduleSlice";
+import scheduleAlgorithmReducer from "../features/scheduleAlgorithmSlice";
 
 export const store = configureStore({
   reducer: {
     schedule: scheduleReducer,
+    scheduleAlgorithm: scheduleAlgorithmReducer,
   },
 });
 
