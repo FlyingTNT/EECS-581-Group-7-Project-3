@@ -1,21 +1,35 @@
 /// SelectedCourses.tsx
-/// React component for displaying the selected courses.
+/// React component for displaying the selected courses and generating possible schedules.
 /// Inputs: None
-/// Outputs: JSX.Element representing the selected courses.
+/// Outputs: JSX.Element representing the selected courses and generation controls.
 /// Authors: Micheal Buckendahl
 /// Creation Date: 10/24/2025
-
-import { useAppSelector } from "../redux/hooks";
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import type { ClassData } from "../types";
+import { generateSchedules } from "../utils/scheduleAlgorithm";
+import { setGeneratedSchedules } from "../features/scheduleAlgorithmSlice";
 import "../styles/SelectedCoursesStyles.css";
 import ClassCard from "./ClassCard";
 
-// Currently this is a place holder to just show how the searchbar is correctly
-// adding the selected courses to the redux store.
 export default function SelectedCourses() {
+  const dispatch = useAppDispatch();
   const selectedCourses = useAppSelector(
     (state) => state.schedule.selectedClasses
   );
+
+  useEffect(() => {
+    if (selectedCourses.length === 0) {
+      console.warn("No courses selected — skipping schedule generation.");
+      dispatch(setGeneratedSchedules([]));
+      return;
+    }
+
+    console.log("Re-generating schedules from selectedCourses:", selectedCourses);
+    const generated = generateSchedules(selectedCourses);
+    console.log(" Generated schedules:", generated);
+    dispatch(setGeneratedSchedules(generated));
+  }, [selectedCourses, dispatch]);
   return (
     <>
       <li>Selected Courses:</li>
