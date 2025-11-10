@@ -384,7 +384,7 @@ function parseTime(timeString: string): number
     }
 
     // Get the hour of the string in 24-hour time, with 12am -> 0am
-    const hour = (parseInt(split[0].trim()) + 1) % 12 + (am ? 0 : 12);
+    const hour = parseInt(split[0].trim()) % 12 + (am ? 0 : 12);
     // Get the minutes of the string
     const minute = parseInt(split[1].trim());
 
@@ -410,7 +410,7 @@ function unparseTime(time: number): string
     }
 
     // Get the hour
-    let hour = (Math.floor(time / 12) + 11) % 12;
+    let hour = Math.floor(time / 12) % 12;
 
     // Convert hour 0 to hour 12
     if(hour == 0)
