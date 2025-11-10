@@ -31,7 +31,7 @@ export default function UnscheduledTable() {
         </div>
 
         <div 
-          className="dropDownButton">
+          className="unsDropDownButton">
           {isDropDownOpen ? "/\\" : "\\/"}
         </div>
       </div>
