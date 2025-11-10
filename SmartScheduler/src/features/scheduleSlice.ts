@@ -38,10 +38,25 @@ const scheduleSlice = createSlice({
     clearSchedule(state) {
       state.selectedClasses = [];
     },
+    reportSchedules(state, action: PayloadAction<SectionData[][]>)
+    {
+      state.permutations = action.payload;
+      if(state.permutations.length === 0)
+      {
+        state.currentPermutation = -1;
+      }
+      else
+      {
+        if(state.currentPermutation < 0 || state.currentPermutation >= state.permutations.length)
+        {
+          state.currentPermutation = 0;
+        }
+      }
+    }
   },
 });
 
-export const { addCourse, removeCourse, clearSchedule } =
+export const { addCourse, removeCourse, clearSchedule, reportSchedules} =
   scheduleSlice.actions;
 export { type ScheduleState }
 export default scheduleSlice.reducer;

@@ -6,10 +6,10 @@
 /// Creation Date: 10/24/2025
 
 import React from "react";
-import { useAppSelector } from "../redux/hooks";
 import ScheduleCard from "./ScheduleCard";
-import type { ClassData, ScheduledTime } from "../types";
+import type { ClassData, ScheduledTime, SectionData } from "../types";
 import "../styles/ScheduleGridStyles.css";
+import { getClass, getCurrentPermutation, getScheduledSections, getState, unparseTime } from "../utils/Utilities";
 
 export default function Grid() {
   // Define column headers
@@ -31,13 +31,11 @@ export default function Grid() {
     return `${displayHour}:${minute.toString().padStart(2, "0")}${suffix}`;
   };
 
-  const selectedCourses = useAppSelector(
-    (state) => state.schedule.selectedClasses
-  );
+  const state = getState();
 
-  const scheduledCourses: ClassData[] = selectedCourses.filter(
-    (course) => course.lectures.length > 0
-  );
+  const permutation: SectionData[] = getCurrentPermutation(state) ?? [];
+
+  const scheduledCourses: SectionData[] = getScheduledSections(permutation);
 
   // This is a temporary way to have a state instance track what is blocked or not
   const [blockedCells, setBlockedCells] = React.useState<Set<string>>(
@@ -84,12 +82,14 @@ export default function Grid() {
           </div>
 
           {days.slice(1).map((dayName, dayIdx) => {
-            const courseInCell = scheduledCourses.find(
+            const sectionInCell = scheduledCourses.find(
               (course) =>
-                course.lectures[0]?.times[0]?.day === dayIdx &&
-                course.lectures[0]?.times[0]?.startTime === slot.hour &&
+                course.times[0]?.day === dayIdx &&
+                course.times[0]?.startTime === slot.hour &&
                 (slot.minute === 0 || slot.minute === 30)
             );
+
+            const sectionCourse = sectionInCell ? getClass(sectionInCell, state) : undefined;
 
             return (
               <div
@@ -106,15 +106,15 @@ export default function Grid() {
                   transition: "background-color 0.2s ease", // a simple tranition styling so the change isnt shocking
                 }}
               >
-                {courseInCell && (
+                {sectionInCell && sectionCourse && (
                   <ScheduleCard
-                    key={courseInCell.id}
-                    name={courseInCell.name}
-                    location={courseInCell.lectures[0]?.location || "TBD"}
+                    key={sectionCourse.id}
+                    name={sectionCourse.name}
+                    location={sectionInCell.location || "TBD"}
                     time={`${["Mon", "Tue", "Wed", "Thu", "Fri"][dayIdx]} ${
                       slot.hour
                     }:${slot.minute.toString().padStart(2, "0")}`}
-                    color={courseInCell.color || "#ccc"}
+                    color={sectionCourse.color || "#ccc"}
                   />
                 )}
               </div>
@@ -125,26 +125,32 @@ export default function Grid() {
 
       {/*display sched cards */}
       {scheduledCourses.map((course) => {
-        const firstLectureTime: ScheduledTime | undefined =
-          course.lectures[0]?.times[0];
+        const firstLectureTime: ScheduledTime | undefined = course.times[0];
+
+        const sectionCourse = getClass(course, state);
+
+        if(!sectionCourse)
+        {
+          return;
+        }
 
         const timeText = firstLectureTime
           ? `${["Mon", "Tue", "Wed", "Thu", "Fri"][firstLectureTime.day]} ${
-              firstLectureTime.startTime
-            }-${firstLectureTime.endTime}`
+              unparseTime(firstLectureTime.startTime)
+            }-${unparseTime(firstLectureTime.endTime)}`
           : "TBD";
 
         const location = firstLectureTime
-          ? course.lectures[0]?.location || "TBD"
+          ? course.location || "TBD"
           : "TBD";
 
         return (
           <ScheduleCard
-            key={course.id}
-            name={course.name}
+            key={sectionCourse.id}
+            name={sectionCourse.name}
             location={location}
             time={timeText}
-            color={course.color || "#ccc"}
+            color={sectionCourse.color || "#ccc"}
           />
         );
       })}

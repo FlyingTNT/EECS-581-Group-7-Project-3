@@ -7,31 +7,36 @@
 
 /// UnscheduledTable.tsx
 
-import React from "react";
-import { useAppSelector } from "../redux/hooks";
 import ScheduleCard from "./ScheduleCard";
-import type { ClassData } from "../types";
+import type { SectionData } from "../types";
+import { getClass, getCurrentPermutation, getState, getUnscheduledSections } from "../utils/Utilities";
 
 export default function UnscheduledTable() {
-  const selectedCourses = useAppSelector(state => state.schedule.selectedClasses);
-
  
-  const unscheduledCourses: ClassData[] = selectedCourses.filter(
-    course => course.lectures.length === 0
-  );
+  const state = getState();
+  const permutation = getCurrentPermutation(state) ?? [];
+  const unscheduledCourses: SectionData[] = getUnscheduledSections(permutation);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       {unscheduledCourses.length === 0 && <div>No unscheduled courses</div>}
-      {unscheduledCourses.map(course => (
+      {unscheduledCourses.map(section => {
+        const course = getClass(section, state);
+
+        if(!course)
+        {
+          return;
+        }
+
+        return (
         <ScheduleCard
           key={course.id}
           name={course.name}
-          location="TBD"
+          location={section.location}
           time="TBD"
           color={course.color || "#ccc"}
         />
-      ))}
+      )})}
     </div>
   );
 }
