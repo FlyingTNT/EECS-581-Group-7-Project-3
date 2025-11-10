@@ -10,11 +10,6 @@
   display: flex;
   flex-direction: column;
 }
-.scheduledAndUnsched {
-  width: 60%;
-  display: flex;
-  flex-direction: column;
-}
 .searchBarContainer {
   margin-bottom: 16px;
   justify-self: center;
@@ -22,6 +17,22 @@
 .selectedCoursesContainer {
   height: 65vh;
 }
-.gridContainer {
-  height: 65vh;
+
+.scheduledAndUnsched {
+  height: inherit;
+  width: 60%;
+  display: flex;
+  flex-direction: column;
+  height: 90vh;
+}
+
+.gridContainer
+{
+  flex: 1;
+  overflow-y: auto;
+}
+
+.unscheduledTableContainer
+{
+  flex-shrink: 0;
 }

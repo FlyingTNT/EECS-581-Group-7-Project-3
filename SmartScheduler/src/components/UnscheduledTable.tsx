@@ -9,7 +9,9 @@
 
 import ScheduleCard from "./ScheduleCard";
 import type { SectionData } from "../types";
+import "../styles/UnscheduledTableStyles.css";
 import { getClass, getCurrentPermutation, getState, getUnscheduledSections } from "../utils/Utilities";
+import { useState } from "react";
 
 export default function UnscheduledTable() {
  
@@ -17,8 +19,26 @@ export default function UnscheduledTable() {
   const permutation = getCurrentPermutation(state) ?? [];
   const unscheduledCourses: SectionData[] = getUnscheduledSections(permutation);
 
+  const [isDropDownOpen, setIsDropDownOpen] = useState(false);
+
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+    <div>
+      <div className="pullUpHeader"
+           onClick={() => setIsDropDownOpen(!isDropDownOpen)}
+           >
+        <div>
+          Unscheduled Sections
+        </div>
+
+        <div 
+          className="dropDownButton">
+          {isDropDownOpen ? "/\\" : "\\/"}
+        </div>
+      </div>
+
+      {
+      isDropDownOpen &&
+      (<div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
       {unscheduledCourses.length === 0 && <div>No unscheduled courses</div>}
       {unscheduledCourses.map(section => {
         const course = getClass(section, state);
@@ -37,6 +57,7 @@ export default function UnscheduledTable() {
           color={course.color || "#ccc"}
         />
       )})}
+      </div>)}
     </div>
   );
 }
