@@ -1,13 +1,13 @@
 .pullUpHeader
 {
-    color: #FF0000;
+    color: #FF00FF;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     cursor: pointer;
 }
 .unsDropDownButton {
-  color: #FF0000;
+  color: #FF00FF;
   font-size: 20px;
   align-items: flex-end;
 }
