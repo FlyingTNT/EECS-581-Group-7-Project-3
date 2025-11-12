@@ -42,6 +42,11 @@ export default function Grid() {
     new Set()
   );
 
+  function startsInBlock(time: ScheduledTime, day: number, hour: number, minute: number)
+  {
+    return time.day === day && Math.floor(time.startTime / 6) === (hour * 2 + (minute > 0 ? 1 : 0));
+  }
+
   // A simple function that takes the click of a cell and uses the temporary state above
   // and logs that that cell was clicked as well as updates that state so that the set can be
   // checked later to know which needs to be rendered gray or not.
@@ -82,12 +87,21 @@ export default function Grid() {
           </div>
 
           {days.slice(1).map((dayName, dayIdx) => {
-            const sectionInCell = scheduledCourses.find(
-              (course) =>
-                course.times[0]?.day === dayIdx &&
-                course.times[0]?.startTime === slot.hour &&
-                (slot.minute === 0 || slot.minute === 30)
-            );
+            let sectionInCell: SectionData | undefined;
+            let sectionTime: ScheduledTime | undefined;
+
+            outer: for(const section of scheduledCourses)
+            {
+              for(const time of section.times)
+              {
+                if(startsInBlock(time, dayIdx + 1, slot.hour, slot.minute))
+                {
+                  sectionInCell = section;
+                  sectionTime = time;
+                  break outer;
+                }
+              }
+            }
 
             const sectionCourse = sectionInCell ? getClass(sectionInCell, state) : undefined;
 
@@ -106,14 +120,12 @@ export default function Grid() {
                   transition: "background-color 0.2s ease", // a simple tranition styling so the change isnt shocking
                 }}
               >
-                {sectionInCell && sectionCourse && (
+                {sectionInCell && sectionTime && sectionCourse && (
                   <ScheduleCard
                     key={sectionCourse.id}
                     name={sectionCourse.name}
                     location={sectionInCell.location || "TBD"}
-                    time={`${["Mon", "Tue", "Wed", "Thu", "Fri"][dayIdx]} ${
-                      slot.hour
-                    }:${slot.minute.toString().padStart(2, "0")}`}
+                    time={days[dayIdx + 1] + " " + unparseTime(sectionTime.startTime) + "-" + unparseTime(sectionTime.endTime)}
                     color={sectionCourse.color || "#ccc"}
                   />
                 )}
@@ -122,38 +134,6 @@ export default function Grid() {
           })}
         </React.Fragment>
       ))}
-
-      {/*display sched cards */}
-      {scheduledCourses.map((course) => {
-        const firstLectureTime: ScheduledTime | undefined = course.times[0];
-
-        const sectionCourse = getClass(course, state);
-
-        if(!sectionCourse)
-        {
-          return;
-        }
-
-        const timeText = firstLectureTime
-          ? `${["Mon", "Tue", "Wed", "Thu", "Fri"][firstLectureTime.day]} ${
-              unparseTime(firstLectureTime.startTime)
-            }-${unparseTime(firstLectureTime.endTime)}`
-          : "TBD";
-
-        const location = firstLectureTime
-          ? course.location || "TBD"
-          : "TBD";
-
-        return (
-          <ScheduleCard
-            key={sectionCourse.id}
-            name={sectionCourse.name}
-            location={location}
-            time={timeText}
-            color={sectionCourse.color || "#ccc"}
-          />
-        );
-      })}
     </div>
   );
 }

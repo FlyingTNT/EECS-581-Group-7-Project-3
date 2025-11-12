@@ -560,4 +560,4 @@ function getUnscheduledSections(sections: SectionData[]): SectionData[]
     return sections.filter(section => section.times.length === 0);
 }
 
-export {getClass, getState, parseHTMLResponse, parseTime, unparseTime,getCurrentPermutation, getScheduledSections, getUnscheduledSections};
+export { getClass, getState, parseHTMLResponse, parseTime, unparseTime, getCurrentPermutation, getScheduledSections, getUnscheduledSections };
