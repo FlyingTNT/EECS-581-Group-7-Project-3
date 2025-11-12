@@ -1,12 +1,13 @@
 /* src/styles/ScheduleCard.css */
 
 .schedule-card {
-  padding: 8px;
   border-radius: 4px;
   margin: 4px 0;
   color: #fff;
   font-weight: bold;
   text-align: center;
+  position: relative;
+  z-index: 1000;
 }
 
 .schedule-card-name {
