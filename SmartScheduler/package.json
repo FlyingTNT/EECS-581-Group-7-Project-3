@@ -9,7 +9,10 @@
     "dev:api": "nodemon server/index.js",
     "build": "vite build",
     "preview": "vite preview",
-    "start:api": "node server/index.js"
+    "start:api": "node server/index.js",
+    "host": "concurrently -k -n VITE,API -c cyan,magenta \"npm:host:vite\" \"npm:host:api\"",
+    "host:vite": "vite --host",
+    "host:api": "node server/index.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
