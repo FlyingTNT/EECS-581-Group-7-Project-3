@@ -5,7 +5,7 @@
 /// Authors: Micheal Buckendahl, Cole Charpentier, Delaney Gray
 /// Creation Date: 10/24/2025
 
-import React from "react";
+import React, { useState } from "react";
 import ScheduleCard from "./ScheduleCard";
 import type { ClassData, ScheduledTime, SectionData } from "../types";
 import "../styles/ScheduleGridStyles.css";
@@ -45,6 +45,30 @@ export default function Grid() {
   function startsInBlock(time: ScheduledTime, day: number, hour: number, minute: number)
   {
     return time.day === day && Math.floor(time.startTime / 6) === (hour * 2 + (minute > 0 ? 1 : 0));
+  }
+
+  const [cellWidth, setCellWidth] = useState(0);
+  const [cellHeight, setCellHeight] = useState(0);
+
+  function onCellRender(cell: Element | null)
+  {
+    if(!cell)
+    {
+      return;
+    }
+
+    setCellWidth(cell.getBoundingClientRect().width);
+    setCellHeight(cell.getBoundingClientRect().height);
+  }
+
+  function getSectionHeight(cellHeight: number, time: ScheduledTime): number
+  {
+      return cellHeight * ((time.endTime - time.startTime) / 6);
+  }
+
+  function getSectionTopPad(cellHeight: number, time: ScheduledTime): number
+  {
+      return cellHeight * (time.startTime % 6) / 6;
   }
 
   // A simple function that takes the click of a cell and uses the temporary state above
@@ -119,6 +143,7 @@ export default function Grid() {
                   cursor: "pointer", // changes your mouse cursor so the users knows its clickable
                   transition: "background-color 0.2s ease", // a simple tranition styling so the change isnt shocking
                 }}
+                ref={slotIdx === 0 && dayIdx === 0 ? onCellRender : undefined}
               >
                 {sectionInCell && sectionTime && sectionCourse && (
                   <ScheduleCard
@@ -127,6 +152,9 @@ export default function Grid() {
                     location={sectionInCell.location || "TBD"}
                     time={days[dayIdx + 1] + " " + unparseTime(sectionTime.startTime) + "-" + unparseTime(sectionTime.endTime)}
                     color={sectionCourse.color || "#ccc"}
+                    height={getSectionHeight(cellHeight, sectionTime)}
+                    width={cellWidth - 6}
+                    topPad={getSectionTopPad(cellHeight, sectionTime)}
                   />
                 )}
               </div>

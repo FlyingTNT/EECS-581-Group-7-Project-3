@@ -14,7 +14,7 @@
   min-height: 40px;
   min-width: 80px;
   display: flex;
-  align-items: center;
+  align-items: top;
   justify-content: center;
 }
 
