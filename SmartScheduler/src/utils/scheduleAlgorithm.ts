@@ -41,16 +41,18 @@ function isConflictFree(schedule: SectionData[]): boolean {
 function buildCourseSectionBundles(course: ClassData): SectionData[][] {
   const { sections } = course;
 
-  const lectures = sections["LEC"] || [];
-  const labs = [...(sections["LAB"] || []), ...(sections["LBN"] || [])];
-  const discussions = [...(sections["DIS"] || []), ...(sections["DSO"] || [])];
-  const activities = sections["ACT"] || [];
+  // Filter out full sections (openSeats <= 0)
+  const filterOpen = (s: SectionData[]) => s.filter(sec => sec.openSeats > 0);
 
-  //  Rules:
-  // 1. If there are lectures, combine with any dependent types (lab/discussion/activity)
+  const lectures = filterOpen(sections["LEC"] || []);
+  const labs = filterOpen([...(sections["LAB"] || []), ...(sections["LBN"] || [])]);
+  const discussions = filterOpen([...(sections["DIS"] || []), ...(sections["DSO"] || [])]);
+  const activities = filterOpen(sections["ACT"] || []);
+
+  // Rules:
+  // 1. If there are lectures, combine with dependent types (lab/discussion/activity)
   // 2. If no lectures, treat remaining sections as independent
 
-  // Case A: Lecture-based course
   if (lectures.length > 0) {
     const bundles: SectionData[][] = [];
 
@@ -72,10 +74,11 @@ function buildCourseSectionBundles(course: ClassData): SectionData[][] {
     return bundles;
   }
 
-  // Case B: No lectures — just treat each section as independent
-  const allTypes = Object.values(sections).flat();
+  // No lectures — treat each section independently
+  const allTypes = Object.values(sections).flat().filter(sec => sec.openSeats > 0);
   return allTypes.map(s => [s]);
 }
+
 
 
 
