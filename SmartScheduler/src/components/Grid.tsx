@@ -153,7 +153,7 @@ export default function Grid() {
                     time={days[dayIdx + 1] + " " + unparseTime(sectionTime.startTime) + "-" + unparseTime(sectionTime.endTime)}
                     color={sectionCourse.color || "#ccc"}
                     height={getSectionHeight(cellHeight, sectionTime)}
-                    width={cellWidth - 6}
+                    width={cellWidth}
                     topPad={getSectionTopPad(cellHeight, sectionTime)}
                   />
                 )}
