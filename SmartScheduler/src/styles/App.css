@@ -2,37 +2,48 @@
   display: flex;
   flex-direction: row;
   gap: 16px;
-  padding: 16px;
+  padding: 16px 16px 8px 16px;
 }
 .searchAndSelected {
-  width: 40%;
-  height: 85vh;
   display: flex;
   flex-direction: column;
+  flex: 0 0 25%;
+  min-height: 0;
 }
 .searchBarContainer {
   margin-bottom: 16px;
   justify-self: center;
 }
-.selectedCoursesContainer {
-  height: 65vh;
-}
-
-.scheduledAndUnsched {
-  height: inherit;
-  width: 60%;
+.selectedAndTotal {
   display: flex;
   flex-direction: column;
-  height: 90vh;
+  flex: 1;
+  justify-content: space-between;
+  min-height: 0;
 }
-
-.gridContainer
-{
+.scheduledAndUnsched {
+  height: inherit;
+  display: flex;
+  flex-direction: column;
+  height: 87vh;
+  flex: 1 1 auto;
+}
+.gridContainer {
   flex: 1;
   overflow-y: auto;
 }
-
-.unscheduledTableContainer
-{
+.unscheduledTableContainer {
   flex-shrink: 0;
+}
+.paginationControls {
+  align-self: center;
+}
+.totalCreditHoursContainer {
+  padding: 2px;
+  justify-self: center;
+}
+.selectedCoursesContainer {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }

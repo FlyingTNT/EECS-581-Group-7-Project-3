@@ -4,24 +4,26 @@ import type { ClassData, SectionData } from "../types";
 
 type ScheduleState = {
   /** The classes that the user has selected thru the search bar */
-  selectedClasses: ClassData[],
+  selectedClasses: ClassData[];
   /** All possible permutations of the sections of {@link ScheduleState.selectedClasses} */
-  permutations: SectionData[][],
+  permutations: SectionData[][];
   /** The index of the permutation in {@link ScheduleState.permutations} that the user has selected, or -1 if there is no valid permutation. */
-  currentPermutation: number,
+  currentPermutation: number;
 
   /** The times that the user has blocked classes from occuring at.
-   * The first index is the day of the week and the second is the time of the day, in 30-minute increments from 12:00am. 
+   * The first index is the day of the week and the second is the time of the day, in 30-minute increments from 12:00am.
    * i.e. blockedTimes[2][3] would refer to Tuesday (2) at 1:30am (3)
    */
-  blockedTimes: boolean[][]
+  blockedTimes: boolean[][];
 };
 
 const initialState: ScheduleState = {
   selectedClasses: [],
   permutations: [],
   currentPermutation: -1,
-  blockedTimes: Array.from([0, 1, 2, 3, 4, 5, 6], _ => Array(2*24).fill(false))
+  blockedTimes: Array.from([0, 1, 2, 3, 4, 5, 6], (_) =>
+    Array(2 * 24).fill(false)
+  ),
 };
 
 const scheduleSlice = createSlice({
@@ -33,30 +35,44 @@ const scheduleSlice = createSlice({
       console.log("Added class:", action.payload);
     },
     removeCourse(state, action: PayloadAction<string>) {
-      state.selectedClasses = state.selectedClasses.filter((s) => s.id !== action.payload);
+      state.selectedClasses = state.selectedClasses.filter(
+        (s) => s.id !== action.payload
+      );
     },
     clearSchedule(state) {
       state.selectedClasses = [];
     },
-    reportSchedules(state, action: PayloadAction<SectionData[][]>)
-    {
+    reportSchedules(state, action: PayloadAction<SectionData[][]>) {
       state.permutations = action.payload;
-      if(state.permutations.length === 0)
-      {
+      if (state.permutations.length === 0) {
         state.currentPermutation = -1;
-      }
-      else
-      {
-        if(state.currentPermutation < 0 || state.currentPermutation >= state.permutations.length)
-        {
+      } else {
+        if (
+          state.currentPermutation < 0 ||
+          state.currentPermutation >= state.permutations.length
+        ) {
           state.currentPermutation = 0;
         }
       }
-    }
+    },
+    incrementCurrentPermutation(state) {
+      if (state.currentPermutation < state.permutations.length) {
+        state.currentPermutation += 1;
+      }
+    },
+    decrementCurrentPermutation(state) {
+      if (state.currentPermutation > 0) state.currentPermutation -= 1;
+    },
   },
 });
 
-export const { addCourse, removeCourse, clearSchedule, reportSchedules} =
-  scheduleSlice.actions;
-export { type ScheduleState }
+export const {
+  addCourse,
+  removeCourse,
+  clearSchedule,
+  reportSchedules,
+  incrementCurrentPermutation,
+  decrementCurrentPermutation,
+} = scheduleSlice.actions;
+export { type ScheduleState };
 export default scheduleSlice.reducer;

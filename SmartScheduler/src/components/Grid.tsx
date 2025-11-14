@@ -5,11 +5,17 @@
 /// Authors: Micheal Buckendahl, Cole Charpentier, Delaney Gray
 /// Creation Date: 10/24/2025
 
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ScheduleCard from "./ScheduleCard";
 import type { ClassData, ScheduledTime, SectionData } from "../types";
 import "../styles/ScheduleGridStyles.css";
-import { getClass, getCurrentPermutation, getScheduledSections, getState, unparseTime } from "../utils/Utilities";
+import {
+  getClass,
+  getCurrentPermutation,
+  getScheduledSections,
+  getState,
+  unparseTime,
+} from "../utils/Utilities";
 
 export default function Grid() {
   // Define column headers
@@ -42,33 +48,42 @@ export default function Grid() {
     new Set()
   );
 
-  function startsInBlock(time: ScheduledTime, day: number, hour: number, minute: number)
-  {
-    return time.day === day && Math.floor(time.startTime / 6) === (hour * 2 + (minute > 0 ? 1 : 0));
+  function startsInBlock(
+    time: ScheduledTime,
+    day: number,
+    hour: number,
+    minute: number
+  ) {
+    return (
+      time.day === day &&
+      Math.floor(time.startTime / 6) === hour * 2 + (minute > 0 ? 1 : 0)
+    );
   }
 
+  const firstCellRef = useRef<HTMLDivElement | null>(null);
   const [cellWidth, setCellWidth] = useState(0);
   const [cellHeight, setCellHeight] = useState(0);
 
-  function onCellRender(cell: Element | null)
-  {
-    if(!cell)
-    {
-      return;
-    }
+  useEffect(() => {
+    const measure = () => {
+      if (!firstCellRef.current) return;
+      const rect = firstCellRef.current.getBoundingClientRect();
+      setCellWidth(rect.width);
+      setCellHeight(rect.height);
+    };
 
-    setCellWidth(cell.getBoundingClientRect().width);
-    setCellHeight(cell.getBoundingClientRect().height);
+    measure(); // initial
+
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
+  function getSectionHeight(cellHeight: number, time: ScheduledTime): number {
+    return cellHeight * ((time.endTime - time.startTime) / 6);
   }
 
-  function getSectionHeight(cellHeight: number, time: ScheduledTime): number
-  {
-      return cellHeight * ((time.endTime - time.startTime) / 6);
-  }
-
-  function getSectionTopPad(cellHeight: number, time: ScheduledTime): number
-  {
-      return cellHeight * (time.startTime % 6) / 6;
+  function getSectionTopPad(cellHeight: number, time: ScheduledTime): number {
+    return (cellHeight * (time.startTime % 6)) / 6;
   }
 
   // A simple function that takes the click of a cell and uses the temporary state above
@@ -114,12 +129,9 @@ export default function Grid() {
             let sectionInCell: SectionData | undefined;
             let sectionTime: ScheduledTime | undefined;
 
-            outer: for(const section of scheduledCourses)
-            {
-              for(const time of section.times)
-              {
-                if(startsInBlock(time, dayIdx + 1, slot.hour, slot.minute))
-                {
+            outer: for (const section of scheduledCourses) {
+              for (const time of section.times) {
+                if (startsInBlock(time, dayIdx + 1, slot.hour, slot.minute)) {
                   sectionInCell = section;
                   sectionTime = time;
                   break outer;
@@ -127,7 +139,9 @@ export default function Grid() {
               }
             }
 
-            const sectionCourse = sectionInCell ? getClass(sectionInCell, state) : undefined;
+            const sectionCourse = sectionInCell
+              ? getClass(sectionInCell, state)
+              : undefined;
 
             return (
               <div
@@ -143,14 +157,20 @@ export default function Grid() {
                   cursor: "pointer", // changes your mouse cursor so the users knows its clickable
                   transition: "background-color 0.2s ease", // a simple tranition styling so the change isnt shocking
                 }}
-                ref={slotIdx === 0 && dayIdx === 0 ? onCellRender : undefined}
+                ref={slotIdx === 0 && dayIdx === 0 ? firstCellRef : undefined}
               >
                 {sectionInCell && sectionTime && sectionCourse && (
                   <ScheduleCard
                     key={sectionCourse.id}
                     name={sectionCourse.name}
                     location={sectionInCell.location || "TBD"}
-                    time={days[dayIdx + 1] + " " + unparseTime(sectionTime.startTime) + "-" + unparseTime(sectionTime.endTime)}
+                    time={
+                      days[dayIdx + 1] +
+                      " " +
+                      unparseTime(sectionTime.startTime) +
+                      "-" +
+                      unparseTime(sectionTime.endTime)
+                    }
                     color={sectionCourse.color || "#ccc"}
                     height={getSectionHeight(cellHeight, sectionTime)}
                     width={cellWidth}

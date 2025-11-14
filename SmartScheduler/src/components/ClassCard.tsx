@@ -105,7 +105,7 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
     >
       <div className="cardHeader">
         <div className="idCreditContainer">
-          {currCourse.id} - {currCourse.maxCredits}
+          {currCourse.name} {currCourse.maxCredits}
         </div>
         <div className="removeButton" onClick={handleRemoveClass}>
           -

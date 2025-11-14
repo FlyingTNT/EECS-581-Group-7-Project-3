@@ -14,6 +14,7 @@ import SelectedCourses from "./components/SelectedCourses";
 import TotalCreditHours from "./components/TotalCreditHours";
 import Grid from "./components/Grid";
 import UnscheduledTable from "./components/UnscheduledTable";
+import PaginationControls from "./components/PaginationControls";
 
 function App() {
   return (
@@ -24,18 +25,25 @@ function App() {
           <div className="searchBarContainer">
             <SearchBar />
           </div>
-          <div className="selectedCoursesContainer">
-            <SelectedCourses />
-          </div>
-          <Divider orientation="horizontal" variant="middle" flexItem />
-          <div className="totalCreditHoursContainer">
-            <TotalCreditHours />
+          <div className="selectedAndTotal">
+            <div className="selectedCoursesContainer">
+              <SelectedCourses />
+            </div>
+            <div>
+              <Divider orientation="horizontal" variant="middle" flexItem />
+              <div className="totalCreditHoursContainer">
+                <TotalCreditHours />
+              </div>
+            </div>
           </div>
         </div>
         <Divider orientation="vertical" variant="middle" flexItem />
         <div className="scheduledAndUnsched">
           <div className="gridContainer">
             <Grid />
+          </div>
+          <div className="paginationControls">
+            <PaginationControls />
           </div>
           <Divider orientation="horizontal" variant="middle" flexItem />
           <div className="unscheduledTableContainer">

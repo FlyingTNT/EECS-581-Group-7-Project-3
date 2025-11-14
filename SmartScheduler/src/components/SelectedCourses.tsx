@@ -23,10 +23,14 @@ export default function SelectedCourses() {
     if (selectedCourses.length === 0) {
       console.warn("No courses selected — skipping schedule generation.");
       dispatch(setGeneratedSchedules([]));
+      dispatch(reportSchedules([]));
       return;
     }
 
-    console.log("Re-generating schedules from selectedCourses:", selectedCourses);
+    console.log(
+      "Re-generating schedules from selectedCourses:",
+      selectedCourses
+    );
     const generated = generateSchedules(selectedCourses);
     console.log(" Generated schedules:", generated);
     dispatch(setGeneratedSchedules(generated));

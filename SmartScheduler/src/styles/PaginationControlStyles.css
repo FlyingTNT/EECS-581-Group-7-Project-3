@@ -1,0 +1,14 @@
+.paginationContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+.leftArrow,
+.rightArrow {
+  font-size: 24px;
+  font-weight: 900;
+  cursor: pointer;
+}
+.currentPerm {
+  align-self: center;
+}
