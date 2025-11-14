@@ -8,7 +8,7 @@
 
 import type { ClassData, SectionData } from "../types";
 import { removeCourse } from "../features/scheduleSlice";
-import "../styles/classCardStyles.css";
+import "../styles/ClassCardStyles.css";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { useState } from "react";
 import { unparseTime } from "../utils/Utilities";
