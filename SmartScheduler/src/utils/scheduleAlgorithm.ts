@@ -79,6 +79,18 @@ function buildCourseSectionBundles(course: ClassData): SectionData[][] {
   return allTypes.map(s => [s]);
 }
 
+export function filterPinnedSchedules(
+  schedules: SectionData[][],
+  pinned: number[]
+): SectionData[][] {
+  if (pinned.length === 0) return schedules;
+
+  return schedules.filter(schedule =>
+    pinned.every(pin =>
+      schedule.some(sec => sec.sectionNumber === pin)
+    )
+  );
+}
 
 
 
@@ -87,7 +99,12 @@ function buildCourseSectionBundles(course: ClassData): SectionData[][] {
 /** Main entry point — generates all conflict-free schedules. */
 export function generateSchedules(classes: ClassData[]): SectionData[][] {
   const sectionGroups = classes.map(buildCourseSectionBundles);
+
   const allCombos = generateCombinations(sectionGroups);
-  return allCombos.filter(isConflictFree);
+
+  const conflictFree = allCombos.filter(isConflictFree);
+
+  return conflictFree;
 }
+
 
