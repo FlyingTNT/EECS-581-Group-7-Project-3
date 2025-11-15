@@ -79,18 +79,34 @@ function buildCourseSectionBundles(course: ClassData): SectionData[][] {
   return allTypes.map(s => [s]);
 }
 
-export function filterPinnedSchedules(
+export function filterSchedules(
   schedules: SectionData[][],
-  pinned: number[]
+  pinned: number[],
+  blockedSlots: string[]
 ): SectionData[][] {
-  if (pinned.length === 0) return schedules;
 
-  return schedules.filter(schedule =>
-    pinned.every(pin =>
+  return schedules.filter(schedule => {
+
+    // Must contain ALL pinned sections
+    const hasPinned = pinned.every(pin =>
       schedule.some(sec => sec.sectionNumber === pin)
-    )
-  );
+    );
+    if (!hasPinned) return false;
+
+    // Must NOT touch any blocked time slot
+    const hitsBlocked = schedule.some(sec =>
+      sec.times.some(t => {
+        const slotIndex = Math.floor(t.startTime / 6);
+        const key = `${t.day}-${slotIndex}`;
+        return blockedSlots.includes(key);
+      })
+    );
+    if (hitsBlocked) return false;
+
+    return true;
+  });
 }
+
 
 
 
