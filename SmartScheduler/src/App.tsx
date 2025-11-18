@@ -38,11 +38,11 @@ function App() {
 
     if(event.key === "ArrowLeft")
     {
-      dispatch(incrementCurrentPermutation());
+      dispatch(decrementCurrentPermutation());
     }
     else
     {
-      dispatch(decrementCurrentPermutation());
+      dispatch(incrementCurrentPermutation());
     }
   }
 
