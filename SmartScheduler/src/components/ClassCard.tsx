@@ -6,7 +6,7 @@
 /// Authors: Micheal Buckendahl
 /// Creation Date: 10/30/2025
 
-import type { ClassData, SectionData } from "../types";
+import type { ClassData, ScheduledTime, SectionData } from "../types";
 import { removeCourse } from "../features/scheduleSlice";
 import "../styles/ClassCardStyles.css";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
@@ -70,7 +70,7 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
     TUT: "Tutorial",
   };
 
-  const days = ["M", "Tu", "W", "Tr", "F"]; // List that we will use to turn numbers to correct day abreviation
+  const days = ["Su", "M", "Tu", "W", "Tr", "F", "Sa"]; // List that we will use to turn numbers to correct day abreviation
 
   // Each of the parts that display the sections and there times are lists and bulleted lists need keys for each
   // element so these two helper functions create completely unique keys for each element
@@ -83,19 +83,43 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
   function TimesList({
     times,
   }: {
-    times: { day: number; startTime: number; endTime: number }[];
+    times: ScheduledTime[];
   }) {
     if (!times || times.length === 0) return null;
     return (
       <ul>
-        {times.map((t) => (
-          <li key={timeKey(t)}>
-            {days[t.day - 1] ?? t.day} {unparseTime(t.startTime)} -{" "}
-            {unparseTime(t.endTime)}
+        {getPrettyTime(times).map((t) => (
+          <li key={t}>
+            {t}
           </li>
         ))}
       </ul>
     );
+  }
+
+  function getPrettyTime(times: ScheduledTime[]) : string[]
+  {
+    if(!times || times.length === 0)
+    {
+      return [];
+    }
+
+    let daysString = "";
+
+    const start = times[0].startTime;
+    const end = times[0].endTime;
+
+    for(const time of times)
+    {
+      if(time.startTime !== start || time.endTime !== end)
+      {
+        return times.map(time => days[time.day] + " " + unparseTime(time.startTime) + "-" + unparseTime(time.endTime));
+      }
+
+      daysString += days[time.day]
+    }
+
+    return [daysString + " " + unparseTime(start) + "-" + unparseTime(end)];
   }
 
   return (
