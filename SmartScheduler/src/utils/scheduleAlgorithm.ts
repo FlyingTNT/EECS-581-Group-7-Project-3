@@ -82,23 +82,28 @@ function buildCourseSectionBundles(course: ClassData): SectionData[][] {
 export function filterSchedules(
   schedules: SectionData[][],
   pinned: number[],
-  blockedSlots: string[]
+  blockedTimes: boolean[][]
 ): SectionData[][] {
-
   return schedules.filter(schedule => {
-
-    // Must contain ALL pinned sections
+    //needs to contain all pinned sections
     const hasPinned = pinned.every(pin =>
       schedule.some(sec => sec.sectionNumber === pin)
     );
     if (!hasPinned) return false;
 
-    // Must NOT touch any blocked time slot
+    // needs to not overlap any blocked time
     const hitsBlocked = schedule.some(sec =>
       sec.times.some(t => {
-        const slotIndex = Math.floor(t.startTime / 6);
-        const key = `${t.day}-${slotIndex}`;
-        return blockedSlots.includes(key);
+        // Convert startTime and endTime (5-min intervals) to slot indices (30-min)
+        const startSlot = Math.floor(t.startTime / 6); // 6 * 5 min = 30 min
+        const endSlot = Math.ceil(t.endTime / 6);      // get end time too
+
+        for (let slot = startSlot; slot < endSlot; slot++) {
+          if (blockedTimes[t.day][slot]) {
+            return true; // hits a blocked time slot
+          }
+        }
+        return false;
       })
     );
     if (hitsBlocked) return false;
@@ -106,6 +111,7 @@ export function filterSchedules(
     return true;
   });
 }
+
 
 
 
