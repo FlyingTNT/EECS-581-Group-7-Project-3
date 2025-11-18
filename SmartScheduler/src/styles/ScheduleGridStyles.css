@@ -8,7 +8,7 @@
 
 .grid-cell {
   border: 1px solid #ddd;
-  height: 4.5vh;
+  height: 3vh;
   min-height: 20px;
   min-width: 80px;
   display: flex;
