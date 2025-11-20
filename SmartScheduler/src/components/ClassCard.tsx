@@ -87,7 +87,7 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
   }) {
     if (!times || times.length === 0) return null;
     return (
-      <ul>
+      <ul className = "timesList">
         {getPrettyTime(times).map((t) => (
           <li key={t}>
             {t}
@@ -191,7 +191,7 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
                 <div className="sectionTypeLabel">{typeLabel}:</div>
                 <ul className="sectionList">
                   {secs.map((sec) => (
-                    <li className="sectionItem" key={sectionKey(type, sec)}>
+                    <li className="sectionItem" key={sectionKey(type, sec)}> 
                       <div className="sectionHeader">
                         Section {sec.sectionNumber}
                       </div>

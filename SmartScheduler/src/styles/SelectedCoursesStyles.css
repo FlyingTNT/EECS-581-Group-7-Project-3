@@ -1,5 +1,5 @@
 .coursesContainer {
-  max-height: 380px;
+  max-height: 74vh;
   overflow-y: auto;
   overflow-x: hidden;
 }

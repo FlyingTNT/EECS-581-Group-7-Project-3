@@ -53,7 +53,7 @@ export default function UnscheduledTable() {
                 key={course.id}
                 name={course.name}
                 location={section.location}
-                time="TBD"
+                time="Unscheduled"
                 color={course.color || "#ccc"}
               />
             );

@@ -99,7 +99,7 @@ export default function SearchBar() {
         className="searchbar"
         freeSolo // allow free text input
         value={null} // keep value controlled by inputValue and state for safety
-        getOptionLabel={(course) => (course as ClassData).id} // Only show the course ids
+        getOptionLabel={(course) => (course as ClassData).id + ": " + (course as ClassData).name} // Only show the course ids
         options={courses} // options are the courses found from the search
         open={isDropDownOpen} // we need to control when the dropdown is shown so we show results when we have them
         loading={isLoading} // Because we have a backend call we need to handle the situation when the call might take some time

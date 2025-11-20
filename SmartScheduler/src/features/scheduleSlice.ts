@@ -56,7 +56,7 @@ const scheduleSlice = createSlice({
       }
     },
     incrementCurrentPermutation(state) {
-      if (state.currentPermutation < state.permutations.length) {
+      if (state.currentPermutation < state.permutations.length - 1) {
         state.currentPermutation += 1;
       }
     },
