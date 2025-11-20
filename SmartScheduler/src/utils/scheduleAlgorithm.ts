@@ -41,24 +41,26 @@ function isConflictFree(schedule: SectionData[]): boolean {
 function buildCourseSectionBundles(course: ClassData): SectionData[][] {
   const { sections } = course;
 
-  const lectures = sections["LEC"] || [];
-  const labs = [...(sections["LAB"] || []), ...(sections["LBN"] || [])];
-  const discussions = [...(sections["DIS"] || []), ...(sections["DSO"] || [])];
-  const activities = sections["ACT"] || [];
+  // Helper: filter out full sections
+  const filterOpen = (s: SectionData[]) => s.filter(sec => sec.openSeats > 0);
 
-  //  Rules:
-  // 1. If there are lectures, combine with any dependent types (lab/discussion/activity)
-  // 2. If no lectures, treat remaining sections as independent
+  // Group types together
+  const lectures    = filterOpen(sections["LEC"] || []);
+  const labs        = filterOpen([...(sections["LAB"] || []), ...(sections["LBN"] || [])]);
+  const discussions = filterOpen([...(sections["DIS"] || []), ...(sections["DSO"] || [])]);
+  const activities  = filterOpen(sections["ACT"] || []);
 
-  // Case A: Lecture-based course
+  // ----------------------------
+  // CASE 1: Normal course with a lecture
+  // ----------------------------
   if (lectures.length > 0) {
     const bundles: SectionData[][] = [];
 
-    for (const lec of lectures) {
-      const labsOrNone = labs.length > 0 ? labs : [null];
-      const discsOrNone = discussions.length > 0 ? discussions : [null];
-      const actsOrNone = activities.length > 0 ? activities : [null];
+    const labsOrNone  = labs.length > 0 ? labs : [null];
+    const discsOrNone = discussions.length > 0 ? discussions : [null];
+    const actsOrNone  = activities.length > 0 ? activities : [null];
 
+    for (const lec of lectures) {
       for (const lab of labsOrNone) {
         for (const dis of discsOrNone) {
           for (const act of actsOrNone) {
@@ -72,10 +74,73 @@ function buildCourseSectionBundles(course: ClassData): SectionData[][] {
     return bundles;
   }
 
-  // Case B: No lectures — just treat each section as independent
-  const allTypes = Object.values(sections).flat();
+  // ----------------------------
+  // CASE 2: No lecture — but multiple required types (e.g., LAB + DIS)
+  // ----------------------------
+  const typeGroups = [labs, discussions, activities].filter(g => g.length > 0);
+
+  // If a class has multiple types, we must choose one section from each type
+  if (typeGroups.length > 1) {
+    const bundles: SectionData[][] = [];
+
+    function buildBundles(idx: number, current: SectionData[]) {
+      if (idx === typeGroups.length) {
+        bundles.push([...current]);
+        return;
+      }
+
+      for (const sec of typeGroups[idx]) {
+        buildBundles(idx + 1, [...current, sec]);
+      }
+    }
+
+    buildBundles(0, []);
+
+    return bundles;
+  }
+
+  // ----------------------------
+  // CASE 3: Only one type (simple class)
+  // ----------------------------
+  const allTypes = Object.values(sections).flat().filter(sec => sec.openSeats > 0);
   return allTypes.map(s => [s]);
 }
+
+
+export function filterSchedules(
+  schedules: SectionData[][],
+  pinned: number[],
+  blockedTimes: boolean[][]
+): SectionData[][] {
+  return schedules.filter(schedule => {
+    //needs to contain all pinned sections
+    const hasPinned = pinned.every(pin =>
+      schedule.some(sec => sec.sectionNumber === pin)
+    );
+    if (!hasPinned) return false;
+
+    // needs to not overlap any blocked time
+    const hitsBlocked = schedule.some(sec =>
+      sec.times.some(t => {
+        // Convert startTime and endTime (5-min intervals) to slot indices (30-min)
+        const startSlot = Math.floor(t.startTime / 6); // 6 * 5 min = 30 min
+        const endSlot = Math.ceil(t.endTime / 6);      // get end time too
+
+        for (let slot = startSlot; slot < endSlot; slot++) {
+          if (blockedTimes[t.day][slot]) {
+            return true; // hits a blocked time slot
+          }
+        }
+        return false;
+      })
+    );
+    if (hitsBlocked) return false;
+
+    return true;
+  });
+}
+
+
 
 
 
@@ -84,7 +149,12 @@ function buildCourseSectionBundles(course: ClassData): SectionData[][] {
 /** Main entry point — generates all conflict-free schedules. */
 export function generateSchedules(classes: ClassData[]): SectionData[][] {
   const sectionGroups = classes.map(buildCourseSectionBundles);
+
   const allCombos = generateCombinations(sectionGroups);
-  return allCombos.filter(isConflictFree);
+
+  const conflictFree = allCombos.filter(isConflictFree);
+
+  return conflictFree;
 }
+
 
