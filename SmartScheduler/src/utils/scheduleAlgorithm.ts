@@ -41,26 +41,26 @@ function isConflictFree(schedule: SectionData[]): boolean {
 function buildCourseSectionBundles(course: ClassData): SectionData[][] {
   const { sections } = course;
 
-  // Filter out full sections (openSeats <= 0)
+  // Helper: filter out full sections
   const filterOpen = (s: SectionData[]) => s.filter(sec => sec.openSeats > 0);
 
-  const lectures = filterOpen(sections["LEC"] || []);
-  const labs = filterOpen([...(sections["LAB"] || []), ...(sections["LBN"] || [])]);
+  // Group types together
+  const lectures    = filterOpen(sections["LEC"] || []);
+  const labs        = filterOpen([...(sections["LAB"] || []), ...(sections["LBN"] || [])]);
   const discussions = filterOpen([...(sections["DIS"] || []), ...(sections["DSO"] || [])]);
-  const activities = filterOpen(sections["ACT"] || []);
+  const activities  = filterOpen(sections["ACT"] || []);
 
-  // Rules:
-  // 1. If there are lectures, combine with dependent types (lab/discussion/activity)
-  // 2. If no lectures, treat remaining sections as independent
-
+  // ----------------------------
+  // CASE 1: Normal course with a lecture
+  // ----------------------------
   if (lectures.length > 0) {
     const bundles: SectionData[][] = [];
 
-    for (const lec of lectures) {
-      const labsOrNone = labs.length > 0 ? labs : [null];
-      const discsOrNone = discussions.length > 0 ? discussions : [null];
-      const actsOrNone = activities.length > 0 ? activities : [null];
+    const labsOrNone  = labs.length > 0 ? labs : [null];
+    const discsOrNone = discussions.length > 0 ? discussions : [null];
+    const actsOrNone  = activities.length > 0 ? activities : [null];
 
+    for (const lec of lectures) {
       for (const lab of labsOrNone) {
         for (const dis of discsOrNone) {
           for (const act of actsOrNone) {
@@ -74,10 +74,38 @@ function buildCourseSectionBundles(course: ClassData): SectionData[][] {
     return bundles;
   }
 
-  // No lectures — treat each section independently
+  // ----------------------------
+  // CASE 2: No lecture — but multiple required types (e.g., LAB + DIS)
+  // ----------------------------
+  const typeGroups = [labs, discussions, activities].filter(g => g.length > 0);
+
+  // If a class has multiple types, we must choose one section from each type
+  if (typeGroups.length > 1) {
+    const bundles: SectionData[][] = [];
+
+    function buildBundles(idx: number, current: SectionData[]) {
+      if (idx === typeGroups.length) {
+        bundles.push([...current]);
+        return;
+      }
+
+      for (const sec of typeGroups[idx]) {
+        buildBundles(idx + 1, [...current, sec]);
+      }
+    }
+
+    buildBundles(0, []);
+
+    return bundles;
+  }
+
+  // ----------------------------
+  // CASE 3: Only one type (simple class)
+  // ----------------------------
   const allTypes = Object.values(sections).flat().filter(sec => sec.openSeats > 0);
   return allTypes.map(s => [s]);
 }
+
 
 export function filterSchedules(
   schedules: SectionData[][],
