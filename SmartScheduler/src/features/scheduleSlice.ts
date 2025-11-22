@@ -63,6 +63,10 @@ const scheduleSlice = createSlice({
     decrementCurrentPermutation(state) {
       if (state.currentPermutation > 0) state.currentPermutation -= 1;
     },
+    toggleBlockedTime(state, action: PayloadAction<{ day: number; timeSlot: number }>) {
+      const { day, timeSlot } = action.payload;
+      state.blockedTimes[day][timeSlot] = !state.blockedTimes[day][timeSlot];
+    },
   },
 });
 
@@ -73,6 +77,7 @@ export const {
   reportSchedules,
   incrementCurrentPermutation,
   decrementCurrentPermutation,
+  toggleBlockedTime,
 } = scheduleSlice.actions;
 export { type ScheduleState };
 export default scheduleSlice.reducer;
