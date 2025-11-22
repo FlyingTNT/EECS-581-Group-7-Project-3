@@ -20,6 +20,7 @@ import { useAppDispatch } from "../redux/hooks";
 import { toggleBlockedTime } from "../features/scheduleSlice";
 
 export default function Grid() {
+  const dispatch = useAppDispatch();
   // Define column headers
   const days = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   // Array of time slots with 30-minute intervals from 8:00am to 8:00pm
