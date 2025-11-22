@@ -16,6 +16,8 @@ import {
   getState,
   unparseTime,
 } from "../utils/Utilities";
+import { useAppDispatch } from "../redux/hooks";
+import { toggleBlockedTime } from "../features/scheduleSlice";
 
 export default function Grid() {
   // Define column headers
@@ -38,15 +40,14 @@ export default function Grid() {
   };
 
   const state = getState();
-
+  // To see blocked times array
+  useEffect(() => {
+    console.log('Current blocked times:', state.blockedTimes);
+  }, [state.blockedTimes]);
+  
   const permutation: SectionData[] = getCurrentPermutation(state) ?? [];
 
   const scheduledCourses: SectionData[] = getScheduledSections(permutation);
-
-  // This is a temporary way to have a state instance track what is blocked or not
-  const [blockedCells, setBlockedCells] = React.useState<Set<string>>(
-    new Set()
-  );
 
   function startsInBlock(
     time: ScheduledTime,
@@ -86,25 +87,18 @@ export default function Grid() {
     return (cellHeight * (time.startTime % 6)) / 6;
   }
 
-  // A simple function that takes the click of a cell and uses the temporary state above
-  // and logs that that cell was clicked as well as updates that state so that the set can be
-  // checked later to know which needs to be rendered gray or not.
+  // Convert hour and minute to time slot index (30-minute increments from 12:00am)
+  const getTimeSlotIndex = (hour: number, minute: number): number => {
+    return hour * 2 + (minute >= 30 ? 1 : 0);
+  };
+  
+  // Handle cell click to toggle blocked time in Redux
   const handleCellClick = (
-    dayName: string,
+    dayIdx: number,
     slot: { hour: number; minute: number }
   ) => {
-    const timeLabel = formatTime(slot.hour, slot.minute);
-    console.log(`Clicked on ${dayName} at ${timeLabel}`);
-    const key = `${dayName}-${slot.hour}:${slot.minute}`;
-    setBlockedCells((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(key)) {
-        newSet.delete(key);
-      } else {
-        newSet.add(key);
-      }
-      return newSet;
-    });
+    const timeSlotIndex = getTimeSlotIndex(slot.hour, slot.minute);
+    dispatch(toggleBlockedTime({ day: dayIdx + 1, timeSlot: timeSlotIndex }));
   };
 
   return (
@@ -143,16 +137,19 @@ export default function Grid() {
               ? getClass(sectionInCell, state)
               : undefined;
 
+
+            const timeSlotIndex = getTimeSlotIndex(slot.hour, slot.minute);
+          
+            const isBlocked = state.blockedTimes[dayIdx + 1]?.[timeSlotIndex] || false;
+          
             return (
               <div
                 key={dayIdx}
                 className="grid-cell"
-                onClick={() => handleCellClick(dayName, slot)}
+                onClick={() => handleCellClick(dayIdx, slot)}
                 style={{
-                  backgroundColor: blockedCells.has(
-                    `${dayName}-${slot.hour}:${slot.minute}`
-                  )
-                    ? "#d3d3d3" // gray
+                  backgroundColor:
+                    isBlocked ? "#d3d3d3" // gray
                     : "transparent",
                   cursor: "pointer", // changes your mouse cursor so the users knows its clickable
                   transition: "background-color 0.2s ease", // a simple tranition styling so the change isnt shocking
