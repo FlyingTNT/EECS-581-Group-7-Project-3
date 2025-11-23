@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { ClassData, SectionData } from "../types";
+import { getCurrentPermutation } from "../utils/Utilities";
 
 type ScheduleState = {
   /** The classes that the user has selected thru the search bar */
@@ -55,6 +56,15 @@ const scheduleSlice = createSlice({
         }
       }
     },
+    togglePin(state, action: PayloadAction<number>){
+      const permutation = getCurrentPermutation(state);
+      const selection = permutation?.find(s => s.sectionNumber === action.payload);
+      if(!selection)
+      {
+        return;
+      }
+      selection.pinned = !selection.pinned;
+    },
     incrementCurrentPermutation(state) {
       if (state.currentPermutation < state.permutations.length - 1) {
         state.currentPermutation += 1;
@@ -71,6 +81,7 @@ export const {
   removeCourse,
   clearSchedule,
   reportSchedules,
+  togglePin,
   incrementCurrentPermutation,
   decrementCurrentPermutation,
 } = scheduleSlice.actions;

@@ -7,6 +7,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import ScheduleCard from "./ScheduleCard";
+import { useDispatch } from "react-redux";
+import { togglePin } from "../features/scheduleSlice";
 import type { ClassData, ScheduledTime, SectionData } from "../types";
 import "../styles/ScheduleGridStyles.css";
 import {
@@ -18,6 +20,7 @@ import {
 } from "../utils/Utilities";
 
 export default function Grid() {
+  const dispatch = useDispatch();
   // Define column headers
   const days = ["", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   // Array of time slots with 30-minute intervals from 8:00am to 8:00pm
@@ -175,6 +178,8 @@ export default function Grid() {
                     height={getSectionHeight(cellHeight, sectionTime)}
                     width={cellWidth}
                     topPad={getSectionTopPad(cellHeight, sectionTime)}
+                    pinned={sectionInCell.pinned}
+                    onPin={() => dispatch(togglePin(sectionInCell.sectionNumber))}
                   />
                 )}
               </div>
