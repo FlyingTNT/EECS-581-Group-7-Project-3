@@ -3,7 +3,7 @@
 /// Header, SearchBar, SelectedCourses, TotalCreditHours, Grid, and UnscheduledTable.
 /// Inputs: None
 /// Outputs: JSX.Element representing the app layout.
-/// Authors: Micheal Buckendahl
+/// Authors: Micheal Buckendahl, C. Cooper
 /// Creation Date: 10/24/2025
 
 import Header from "./components/Header";

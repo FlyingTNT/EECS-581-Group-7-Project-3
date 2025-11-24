@@ -14,11 +14,50 @@ interface ScheduleCardProps {
   height?: number;
   width?: number;
   topPad?: number;
+  pinned?: boolean;
+  onPin?: () => void; 
 }
 
-export default function ScheduleCard({ name, location, time, color, height, width, topPad }: ScheduleCardProps) {
+export default function ScheduleCard({
+  name,
+  location,
+  time,
+  color,
+  height,
+  width,
+  topPad,
+  pinned,
+  onPin,
+}: ScheduleCardProps) {
   return (
-    <div className="schedule-card" style={{ backgroundColor: color, height: height, width: width, paddingTop: topPad}}>
+    <div
+      className="schedule-card"
+      style={{
+        backgroundColor: color,
+        height: height,
+        width: width,
+        paddingTop: topPad,
+        position: "relative",
+        cursor: onPin ? "pointer" : "default",
+      }}
+      onClick={event => { if(onPin) {onPin(); event.stopPropagation();}}}
+    >
+      {/* Pin image */}
+      {pinned && (
+        <img
+          src="/pin.svg"
+          alt="Pinned"
+          style={{
+            position: "absolute",
+            top: "2px",
+            right: "2px",
+            width: "16px",
+            height: "16px",
+            zIndex: 10,
+          }}
+        />
+      )}
+
       <div className="schedule-card-name">{name}</div>
       <div className="schedule-card-location">{location}</div>
       <div className="schedule-card-time">{time}</div>

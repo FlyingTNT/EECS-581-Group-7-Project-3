@@ -2,12 +2,14 @@
 /// React component for displaying the scheduling grid.
 /// Inputs: None
 /// Outputs: JSX.Element representing the scheduling grid. Display of Schedule cards
-/// Authors: Micheal Buckendahl, Cole Charpentier, Delaney Gray
+/// Authors: Micheal Buckendahl, Cole Charpentier, Delaney Gray, C. Cooper
 /// Creation Date: 10/24/2025
 
 import React, { useEffect, useRef, useState } from "react";
 import ScheduleCard from "./ScheduleCard";
-import type { ClassData, ScheduledTime, SectionData } from "../types";
+import { useDispatch } from "react-redux";
+import { togglePin } from "../features/scheduleSlice";
+import type { ScheduledTime, SectionData } from "../types";
 import "../styles/ScheduleGridStyles.css";
 import {
   getClass,
@@ -57,15 +59,17 @@ export default function Grid() {
     minute: number
   ) {
     return (
-      time.day === day &&
-      Math.floor(time.startTime / 6) === hour * 2 + (minute > 0 ? 1 : 0)
+      time.day === day && // The same day
+      Math.floor(time.startTime / 6) === hour * 2 + (minute > 0 ? 1 : 0) // And the same 30-minute period
     );
   }
 
+  // The first cell in the grid, and its width and height, for rendering the sections the correct size
   const firstCellRef = useRef<HTMLDivElement | null>(null);
   const [cellWidth, setCellWidth] = useState(0);
   const [cellHeight, setCellHeight] = useState(0);
 
+  // Keep the first cell width and height updated
   useEffect(() => {
     const measure = () => {
       if (!firstCellRef.current) return;
@@ -80,11 +84,25 @@ export default function Grid() {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
+  /**
+   * Get the height of the section with the given ScheduledTime
+   * @param cellHeight The height of one cell in the grid
+   * @param time The time of the section
+   * @returns The height of the section
+   */
   function getSectionHeight(cellHeight: number, time: ScheduledTime): number {
+    // Return the height of one cell times the number of 30-minutes the section takes up
     return cellHeight * ((time.endTime - time.startTime) / 6);
   }
 
+  /**
+   * Get amount of padding above the section for the section with the given ScheduledTime
+   * @param cellHeight The height of one cell in the grid
+   * @param time The time of the section
+   * @returns The top padding for the section
+   */
   function getSectionTopPad(cellHeight: number, time: ScheduledTime): number {
+    // Return the cell height times the percentage of a 30-minute block after a 30-minute marker that the class starts (e.g. height * .50 for :15 or :45)
     return (cellHeight * (time.startTime % 6)) / 6;
   }
 
@@ -159,8 +177,8 @@ export default function Grid() {
               >
                 {sectionInCell && sectionTime && sectionCourse && (
                   <ScheduleCard
-                    key={sectionCourse.id}
-                    name={sectionCourse.name}
+                    key={sectionCourse.id + sectionInCell.times[0].day + unparseTime(sectionInCell.times[0].startTime)}
+                    name={sectionCourse.id + " " + sectionInCell.type}
                     location={sectionInCell.location || "TBD"}
                     time={
                       days[dayIdx + 1] +
@@ -173,6 +191,8 @@ export default function Grid() {
                     height={getSectionHeight(cellHeight, sectionTime)}
                     width={cellWidth}
                     topPad={getSectionTopPad(cellHeight, sectionTime)}
+                    pinned={sectionInCell.pinned}
+                    onPin={() => dispatch(togglePin(sectionInCell.sectionNumber))}
                   />
                 )}
               </div>
