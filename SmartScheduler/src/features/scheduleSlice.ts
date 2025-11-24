@@ -1,7 +1,8 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { ClassData, SectionData } from "../types";
-import { getCurrentPermutation } from "../utils/Utilities";
+import { getClass, getCurrentPermutation, getPinnedSections } from "../utils/Utilities";
+import { filterSchedules, generateSchedules } from "../utils/scheduleAlgorithm";
 
 type ScheduleState = {
   /** The classes that the user has selected thru the search bar */
@@ -43,6 +44,20 @@ const scheduleSlice = createSlice({
     clearSchedule(state) {
       state.selectedClasses = [];
     },
+    regenerateSchedules(state, action: PayloadAction<boolean>)
+    {
+      const fullRegenerate = action.payload;
+
+      console.log("Re-generating schedules from selectedCourses:", state.selectedClasses);
+
+      let schedules = fullRegenerate ? generateSchedules(state.selectedClasses) : state.permutations;
+
+      schedules = filterSchedules(schedules, getPinnedSections(state.selectedClasses), state.blockedTimes);
+
+      console.log(schedules, getPinnedSections(state.selectedClasses));
+
+      scheduleSlice.caseReducers.reportSchedules(state, {type: "SectionData[][]", payload: schedules});
+    },
     reportSchedules(state, action: PayloadAction<SectionData[][]>) {
       state.permutations = action.payload;
       if (state.permutations.length === 0) {
@@ -63,7 +78,24 @@ const scheduleSlice = createSlice({
       {
         return;
       }
+
+      const course = getClass(selection, state);
+
+      outer: for(const sectionType in course?.sections)
+      {
+        for(const section of course.sections[sectionType])
+        {
+          if(section.sectionNumber === action.payload)
+          {
+            section.pinned = !section.pinned;
+            break outer;
+          }
+        }
+      }
+
       selection.pinned = !selection.pinned;
+
+      scheduleSlice.caseReducers.regenerateSchedules({...state, permutations: state.permutations}, {type: "boolean", payload: !selection.pinned})
     },
     incrementCurrentPermutation(state) {
       if (state.currentPermutation < state.permutations.length - 1) {
@@ -84,6 +116,7 @@ export const {
   togglePin,
   incrementCurrentPermutation,
   decrementCurrentPermutation,
+  regenerateSchedules
 } = scheduleSlice.actions;
 export { type ScheduleState };
 export default scheduleSlice.reducer;

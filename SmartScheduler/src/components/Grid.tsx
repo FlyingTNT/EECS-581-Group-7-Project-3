@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import ScheduleCard from "./ScheduleCard";
 import { useDispatch } from "react-redux";
-import { togglePin } from "../features/scheduleSlice";
+import { regenerateSchedules, togglePin } from "../features/scheduleSlice";
 import type { ClassData, ScheduledTime, SectionData } from "../types";
 import "../styles/ScheduleGridStyles.css";
 import {

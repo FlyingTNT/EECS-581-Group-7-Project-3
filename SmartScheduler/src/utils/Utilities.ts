@@ -560,4 +560,25 @@ function getUnscheduledSections(sections: SectionData[]): SectionData[]
     return sections.filter(section => section.times.length === 0);
 }
 
-export { getClass, getState, parseHTMLResponse, parseTime, unparseTime, getCurrentPermutation, getScheduledSections, getUnscheduledSections };
+function getPinnedSections(classes: ClassData[]): number[]
+{
+    const out: number[] = [];
+
+    for(const course of classes)
+    {
+        for(const sectionType in course.sections)
+        {
+            for(const section of course.sections[sectionType])
+            {
+                if(section.pinned)
+                {
+                    out.push(section.sectionNumber);
+                }
+            }
+        }
+    }
+
+    return out;
+}
+
+export { getClass, getState, parseHTMLResponse, parseTime, unparseTime, getCurrentPermutation, getScheduledSections, getUnscheduledSections, getPinnedSections };

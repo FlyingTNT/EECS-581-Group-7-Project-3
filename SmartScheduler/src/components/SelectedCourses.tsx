@@ -7,11 +7,10 @@
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import type { ClassData } from "../types";
-import { generateSchedules } from "../utils/scheduleAlgorithm";
 import { setGeneratedSchedules } from "../features/scheduleAlgorithmSlice";
 import "../styles/SelectedCoursesStyles.css";
 import ClassCard from "./ClassCard";
-import { reportSchedules } from "../features/scheduleSlice";
+import { regenerateSchedules, reportSchedules } from "../features/scheduleSlice";
 
 export default function SelectedCourses() {
   const dispatch = useAppDispatch();
@@ -27,14 +26,7 @@ export default function SelectedCourses() {
       return;
     }
 
-    console.log(
-      "Re-generating schedules from selectedCourses:",
-      selectedCourses
-    );
-    const generated = generateSchedules(selectedCourses);
-    console.log(" Generated schedules:", generated);
-    dispatch(setGeneratedSchedules(generated));
-    dispatch(reportSchedules(generated));
+    dispatch(regenerateSchedules(true));
   }, [selectedCourses, dispatch]);
   return (
     <>

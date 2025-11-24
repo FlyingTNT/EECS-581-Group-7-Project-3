@@ -40,7 +40,7 @@ export default function ScheduleCard({
         position: "relative",
         cursor: onPin ? "pointer" : "default",
       }}
-      onClick={onPin}
+      onClick={event => { if(onPin) {onPin(); event.stopPropagation();}}}
     >
       {/* Pin image */}
       {pinned && (
