@@ -130,6 +130,8 @@ const scheduleSlice = createSlice({
     toggleBlockedTime(state, action: PayloadAction<{ day: number; timeSlot: number }>) {
       const { day, timeSlot } = action.payload;
       state.blockedTimes[day][timeSlot] = !state.blockedTimes[day][timeSlot];
+
+      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: !state.blockedTimes[day][timeSlot]})
     },
   },
 });
