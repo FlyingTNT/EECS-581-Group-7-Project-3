@@ -26,7 +26,7 @@ export default function SelectedCourses() {
       return;
     }
 
-    dispatch(regenerateSchedules(true));
+    dispatch(regenerateSchedules({fullRegenerate: true, reAlert: true}));
   }, [selectedCourses, dispatch]);
   return (
     <>

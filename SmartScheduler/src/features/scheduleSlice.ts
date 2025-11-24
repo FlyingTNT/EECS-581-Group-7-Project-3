@@ -55,22 +55,28 @@ const scheduleSlice = createSlice({
     /**
      * Regenerate the permutations based on the currently selected courses
      * @param state The current state
-     * @param action True payload if the permutations need to be fully regenerated, or false if they can just be re-filtered (e.g. only need to be filtered if a time was blocked)
+     * @param action Whether if the permutations need to be fully regenerated, or it can just be re-filtered, along with whether to always display a dialogue when there is no valid schedule
      */
-    regenerateSchedules(state, action: PayloadAction<boolean>)
+    regenerateSchedules(state, action: PayloadAction<{fullRegenerate: boolean, reAlert: boolean}>)
     {
-      const fullRegenerate = action.payload;
-
       console.log("Re-generating schedules from selectedCourses:", state.selectedClasses);
 
+      const oldScheduleCount = state.permutations.length;
+
       // The unfiltered schedules - just the current schedules if we don't need to fully regenerate
-      let schedules = fullRegenerate ? generateSchedules(state.selectedClasses) : state.permutations;
+      let schedules = action.payload.fullRegenerate ? generateSchedules(state.selectedClasses) : state.permutations;
 
       // Filter the schedules
       schedules = filterSchedules(schedules, getPinnedSections(state.selectedClasses), state.blockedTimes);
 
       // Push the filtered schedules
       scheduleSlice.caseReducers.reportSchedules(state, {type: "SectionData[][]", payload: schedules});
+
+      // If there are no possible schedules and (there used to be, or we should re-alert anyways), display an alert
+      if(schedules.length === 0 && (oldScheduleCount != 0 || action.payload.reAlert))
+      {
+        window.alert("There are no valid class combinations.");
+      }
     },
     /**
      * Push a new set of schedule permutations that have been generated
@@ -117,7 +123,7 @@ const scheduleSlice = createSlice({
       selection.pinned = !selection.pinned;
 
       // Regenerate the schedules, doing a full regeneration if the section was unpinned
-      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: !selection.pinned})
+      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: {fullRegenerate: !selection.pinned, reAlert: false}})
     },
     incrementCurrentPermutation(state) {
       if (state.currentPermutation < state.permutations.length - 1) {
@@ -131,7 +137,7 @@ const scheduleSlice = createSlice({
       const { day, timeSlot } = action.payload;
       state.blockedTimes[day][timeSlot] = !state.blockedTimes[day][timeSlot];
 
-      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: !state.blockedTimes[day][timeSlot]})
+      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: {fullRegenerate: !state.blockedTimes[day][timeSlot], reAlert: false}})
     },
   },
 });
