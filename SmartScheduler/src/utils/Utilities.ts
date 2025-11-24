@@ -526,7 +526,7 @@ function getClass(idOrSection: string | SectionData, state: ScheduleState | null
 /**
  * Get the sections in the currently-selected permutation
  * @param state The current global state. If in a component, this is unnecessary, but it needs to be provided if calling from one of the slice functions.
- * @returns Tthe currently-selected permutation, or an empty list if there is no selected permutation
+ * @returns The currently-selected permutation, or an empty list if there is no selected permutation
  */
 function getCurrentPermutation(state: ScheduleState | null = null): SectionData[] | null
 {
@@ -586,4 +586,44 @@ function getPinnedSections(classes: ClassData[]): number[]
     return out;
 }
 
-export { getClass, getState, parseHTMLResponse, parseTime, unparseTime, getCurrentPermutation, getScheduledSections, getUnscheduledSections, getPinnedSections };
+/**
+ * Gets the current topic of the given course
+ * @param course The course to get the topic of
+ * @param state The current global state. If in a component, this is unnecessary, but it needs to be provided if calling from one of the slice functions.
+ * @returns The topic of the course
+ */
+function getTopic(course: ClassData, state: ScheduleState | null = null): string
+{
+    // If the given state was null, get the current state
+    state ??= getState();
+
+    // Get the current permutation
+    const permutation = getCurrentPermutation(state);
+
+    // If there itn't a permutation, return the empty string
+    if(!permutation)
+    {
+        return "";
+    }
+
+    // For each section
+    for(const section of permutation)
+    {
+        // Skip sections unrelated to this course
+        if(section.classId !== course.id)
+        {
+            continue;
+        }
+
+        // If the section has a topic, return that
+        if(section.topic !== "")
+        {
+            return section.topic;
+        }
+    }
+
+    // If no section with a topic was found, return the empty string
+    return "";
+}
+
+export { getClass, getState, parseHTMLResponse, parseTime, unparseTime, getCurrentPermutation, getScheduledSections, getUnscheduledSections, getPinnedSections, getTopic };

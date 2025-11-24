@@ -11,7 +11,7 @@ import { removeCourse } from "../features/scheduleSlice";
 import "../styles/ClassCardStyles.css";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
 import { useState } from "react";
-import { unparseTime } from "../utils/Utilities";
+import { getTopic, unparseTime } from "../utils/Utilities";
 
 interface ClassCardProps {
   currCourse: ClassData;
@@ -129,7 +129,7 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
     >
       <div className="cardHeader">
         <div className="idCreditContainer">
-          {currCourse.name} {currCourse.maxCredits}
+          {currCourse.id}: {currCourse.name} {getTopic(currCourse)} {currCourse.maxCredits}
         </div>
         <div className="removeButton" onClick={handleRemoveClass}>
           -

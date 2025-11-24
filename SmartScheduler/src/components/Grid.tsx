@@ -188,8 +188,8 @@ export default function Grid() {
               >
                 {sectionInCell && sectionTime && sectionCourse && (
                   <ScheduleCard
-                    key={sectionCourse.id}
-                    name={sectionCourse.name}
+                    key={sectionCourse.id + sectionInCell.times[0].day + unparseTime(sectionInCell.times[0].startTime)}
+                    name={sectionCourse.id + " " + sectionInCell.type}
                     location={sectionInCell.location || "TBD"}
                     time={
                       days[dayIdx + 1] +
