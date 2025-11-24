@@ -1,3 +1,11 @@
+/**
+ * scheduleSlice.ts
+ * Inputs: None
+ * Outputs: Various functions for modifying the global state for the ScheduleBuilder app
+ * Creation Date: 2025-10-23
+ * Authors: Micheal Buckendahl, C. Cooper, Delaney Gray, Cole Charpentier
+ */
+
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { ClassData, SectionData } from "../types";
@@ -44,20 +52,31 @@ const scheduleSlice = createSlice({
     clearSchedule(state) {
       state.selectedClasses = [];
     },
+    /**
+     * Regenerate the permutations based on the currently selected courses
+     * @param state The current state
+     * @param action True payload if the permutations need to be fully regenerated, or false if they can just be re-filtered (e.g. only need to be filtered if a time was blocked)
+     */
     regenerateSchedules(state, action: PayloadAction<boolean>)
     {
       const fullRegenerate = action.payload;
 
       console.log("Re-generating schedules from selectedCourses:", state.selectedClasses);
 
+      // The unfiltered schedules - just the current schedules if we don't need to fully regenerate
       let schedules = fullRegenerate ? generateSchedules(state.selectedClasses) : state.permutations;
 
+      // Filter the schedules
       schedules = filterSchedules(schedules, getPinnedSections(state.selectedClasses), state.blockedTimes);
 
-      console.log(schedules, getPinnedSections(state.selectedClasses));
-
+      // Push the filtered schedules
       scheduleSlice.caseReducers.reportSchedules(state, {type: "SectionData[][]", payload: schedules});
     },
+    /**
+     * Push a new set of schedule permutations that have been generated
+     * @param state The current state
+     * @param action The new permutations
+     */
     reportSchedules(state, action: PayloadAction<SectionData[][]>) {
       state.permutations = action.payload;
       if (state.permutations.length === 0) {
@@ -81,6 +100,7 @@ const scheduleSlice = createSlice({
 
       const course = getClass(selection, state);
 
+      // Update the pin in the class object
       outer: for(const sectionType in course?.sections)
       {
         for(const section of course.sections[sectionType])
@@ -93,9 +113,11 @@ const scheduleSlice = createSlice({
         }
       }
 
+      // Update the pin in the permutation object
       selection.pinned = !selection.pinned;
 
-      scheduleSlice.caseReducers.regenerateSchedules({...state, permutations: state.permutations}, {type: "boolean", payload: !selection.pinned})
+      // Regenerate the schedules, doing a full regeneration if the section was unpinned
+      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: !selection.pinned})
     },
     incrementCurrentPermutation(state) {
       if (state.currentPermutation < state.permutations.length - 1) {

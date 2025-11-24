@@ -1,3 +1,11 @@
+/**
+ * scheduleAlgorithm.ts
+ * Inputs: None
+ * Outputs: Various functions for finding the possible schedule permutations for the ScheduleBuilder app
+ * Creation Date: 2025-11-09
+ * Authors: Blake J
+ */
+
 import type { ClassData, SectionData } from "../types";
 
 /** Generate all combinations of sections across selected classes. */

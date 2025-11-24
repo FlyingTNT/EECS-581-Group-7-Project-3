@@ -6,8 +6,8 @@
  * Authors: C. Cooper
  */
 
-import {type ClassData, type SectionData, type ScheduledTime} from "../types";
-import {type ScheduleState} from "../features/scheduleSlice";
+import { type ClassData, type SectionData, type ScheduledTime } from "../types";
+import { type ScheduleState } from "../features/scheduleSlice";
 import { useAppSelector } from "../redux/hooks";
 
 /**
@@ -560,13 +560,18 @@ function getUnscheduledSections(sections: SectionData[]): SectionData[]
     return sections.filter(section => section.times.length === 0);
 }
 
+/**
+ * Gets the section numbers of the pinned sections of the given classes
+ * @param classes The list of classes to get the pinned sections for
+ * @returns A list of all of the pinned section numbers
+ */
 function getPinnedSections(classes: ClassData[]): number[]
 {
     const out: number[] = [];
 
     for(const course of classes)
     {
-        for(const sectionType in course.sections)
+        for(const sectionType in course.sections) // For each section type (e.g. LEC)
         {
             for(const section of course.sections[sectionType])
             {
