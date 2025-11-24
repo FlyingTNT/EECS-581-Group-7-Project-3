@@ -8,16 +8,17 @@
   text-align: center;
   position: relative;
   z-index: 1000;
+  font-size: clamp(9px, clamp(9px, 0.8vw, 15px), 2vh);
 }
 
 .schedule-card-name {
-  font-size: 1.1em;
+  font-size: clamp(9px, 1.1em, 15px);
 }
 
 .schedule-card-location {
-  font-size: 0.9em;
+  font-size: clamp(9px, 0.9em, 15px);
 }
 
 .schedule-card-time {
-  font-size: 0.8em;
+  font-size: clamp(9px, 0.8em, 15px);
 }
