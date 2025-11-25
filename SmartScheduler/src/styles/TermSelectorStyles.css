@@ -1,0 +1,28 @@
+.termSelector
+{
+    float: right;
+    padding-right: 2%;
+    font-size: medium;
+    font-weight: normal;
+}
+
+select,
+::picker(select) {
+  appearance: base-select;
+  border-radius: 5px;
+}
+
+select::picker-icon
+{
+    display: none;
+}
+
+option:checked
+{
+    font-weight: bold;
+}
+
+option::checkmark
+{
+    display: none;
+}

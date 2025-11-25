@@ -626,4 +626,55 @@ function getTopic(course: ClassData, state: ScheduleState | null = null): string
     return "";
 }
 
-export { getClass, getState, parseHTMLResponse, parseTime, unparseTime, getCurrentPermutation, getScheduledSections, getUnscheduledSections, getPinnedSections, getTopic };
+// Summer classes released: March 5
+// Fall classes released: March 6
+// Spring classes released: September 25
+
+/**
+ * Get the next term school for the current date, ignoring the summer term. Attempts to change the next term 1-2 weeks before the schedule of classes release
+ * 
+ * Based on the following historical release dates:
+ * Summer classes released: March 5
+ * Fall classes released: March 6
+ * Spring classes released: September 25
+ * @returns An object containing the year and season of the next term.
+ */
+function getNextTerm() : { year: number, season: string }
+{
+    // Today
+    const today = new Date();
+
+    // Show spring classes between September 16 and the beginning of March (months are zero-index)
+    const springCasses = today.getMonth() < 2 || today.getMonth() > 8 || (today.getMonth() === 8 && today.getDate() > 15);
+
+    // If the next term is in the spring and this is not in the new year already, the next term is next year
+    const nextYear = springCasses && today.getMonth() > 2;
+
+    return {
+        year: today.getFullYear() + (nextYear ? 1 : 0),
+        season: springCasses ? "Spring" : "Fall"
+    };
+}
+
+/**
+ * Gets the term after the given term.
+ * @param currentTerm The current term.
+ * @returns The term after the given term.
+ */
+function getTermAfter(currentTerm: { year: number, season: string }) : { year: number, season: string }
+{
+    return {
+        year: currentTerm.season === "Fall" ? currentTerm.year + 1 : currentTerm.year, // If the current term is fall, the next term is in the next year
+        season: currentTerm.season === "Fall" ? "Spring" : currentTerm.season === "Spring" ? "Summer" : "Fall" // Fall -> Spring -> Summer -> Fall
+    };
+}
+
+// Helper function to compute the term code based on year and season
+function getTermCode(year: number, season: string) {
+  const base = 4000;
+  const yearOffset = (year - 2000) * 10;
+  const seasonOffset = season === "Spring" ? 2 : season === "Summer" ? 6 : 9;
+  return base + yearOffset + seasonOffset;
+}
+
+export { getClass, getState, parseHTMLResponse, parseTime, unparseTime, getCurrentPermutation, getScheduledSections, getUnscheduledSections, getPinnedSections, getTopic, getNextTerm, getTermAfter, getTermCode };

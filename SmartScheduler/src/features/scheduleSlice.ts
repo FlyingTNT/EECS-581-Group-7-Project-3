@@ -9,7 +9,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { ClassData, SectionData } from "../types";
-import { getClass, getCurrentPermutation, getPinnedSections } from "../utils/Utilities";
+import { getClass, getCurrentPermutation, getNextTerm, getPinnedSections, getTermCode } from "../utils/Utilities";
 import { filterSchedules, generateSchedules } from "../utils/scheduleAlgorithm";
 
 type ScheduleState = {
@@ -25,6 +25,8 @@ type ScheduleState = {
    * i.e. blockedTimes[2][3] would refer to Tuesday (2) at 1:30am (3)
    */
   blockedTimes: boolean[][];
+
+  selectedTerm: number;
 };
 
 const initialState: ScheduleState = {
@@ -34,6 +36,7 @@ const initialState: ScheduleState = {
   blockedTimes: Array.from([0, 1, 2, 3, 4, 5, 6], (_) =>
     Array(2 * 24).fill(false)
   ),
+  selectedTerm: getTermCode(getNextTerm().year, getNextTerm().season)
 };
 
 const scheduleSlice = createSlice({
@@ -123,7 +126,7 @@ const scheduleSlice = createSlice({
       selection.pinned = !selection.pinned;
 
       // Regenerate the schedules, doing a full regeneration if the section was unpinned
-      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: {fullRegenerate: !selection.pinned, reAlert: false}})
+      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: {fullRegenerate: !selection.pinned, reAlert: false}});
     },
     incrementCurrentPermutation(state) {
       if (state.currentPermutation < state.permutations.length - 1) {
@@ -137,8 +140,14 @@ const scheduleSlice = createSlice({
       const { day, timeSlot } = action.payload;
       state.blockedTimes[day][timeSlot] = !state.blockedTimes[day][timeSlot];
 
-      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: {fullRegenerate: !state.blockedTimes[day][timeSlot], reAlert: false}})
+      scheduleSlice.caseReducers.regenerateSchedules(state, {type: "boolean", payload: {fullRegenerate: !state.blockedTimes[day][timeSlot], reAlert: false}});
     },
+    setCurrentTerm(state, action: PayloadAction<number>)
+    {
+      state.selectedTerm = action.payload;
+
+      scheduleSlice.caseReducers.clearSchedule(state);
+    }
   },
 });
 
@@ -151,7 +160,8 @@ export const {
   incrementCurrentPermutation,
   decrementCurrentPermutation,
   toggleBlockedTime,
-  regenerateSchedules
+  regenerateSchedules,
+  setCurrentTerm
 } = scheduleSlice.actions;
 export { type ScheduleState };
 export default scheduleSlice.reducer;

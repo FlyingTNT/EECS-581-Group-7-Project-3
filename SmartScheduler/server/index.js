@@ -2,7 +2,7 @@
 /// Express server to proxy requests to KU course search.
 /// Inputs: GET requests with query parameter 'q' for course search text.
 /// Outputs: HTML response from KU course search.
-/// Authors: Micheal Buckendahl
+/// Authors: Micheal Buckendahl, C. Cooper
 /// Creation Date: 10/24/2025
 
 import express from "express";
@@ -16,18 +16,10 @@ const PORT = process.env.PORT || 3001;
 // KU course search base URL
 const BASE_URL = "https://classes.ku.edu/Classes/CourseSearch.action";
 
-// Helper function to compute the term code based on year and season
-function getTermCode(year, season) {
-  const base = 4000;
-  const yearOffset = (year - 2000) * 10;
-  const seasonOffset = season === "spring" ? 2 : season === "summer" ? 6 : 9;
-  return base + yearOffset + seasonOffset;
-}
-
 // Helper function to construct the search message payload that the KU course search expects
 // Note that right now we only give the user the ability to search by text and not term. But the
 // function is built to allow term specification in the future.
-function getSearchMessage(text, term = getTermCode(2026, "spring")) {
+function getSearchMessage(text, term = 4262) {
   return {
     classesSearchText: text,
     searchCareer: "UndergraduateGraduate",
@@ -63,8 +55,10 @@ app.get("/api/courses", async (req, res) => {
     // Extract the search query parameter 'q' from the request
     const q = String(req.query.q ?? "");
 
+    const term = Number(req.query.term ?? 4262);
+
     // Prepare the form data and make a POST request to the KU course search URL
-    const form = new URLSearchParams(getSearchMessage(q));
+    const form = new URLSearchParams(getSearchMessage(q, term));
 
     // Make a POST request to the KU course search URL
     const r = await axios.post(BASE_URL, form, {
