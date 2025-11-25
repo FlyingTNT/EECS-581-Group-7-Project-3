@@ -180,7 +180,7 @@ export default function Grid() {
                     name={sectionCourse.id + " " + sectionInCell.type}
                     location={sectionInCell.location || "TBD"}
                     time={
-                      days[dayIdx + 1] +
+                      ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][dayIdx + 1] +
                       " " +
                       unparseTime(sectionTime.startTime) +
                       "-" +
