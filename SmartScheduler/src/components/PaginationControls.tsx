@@ -13,11 +13,13 @@ export default function PaginationControls() {
   const currentPermutation = useAppSelector(
     (state) => state.schedule.currentPermutation
   );
+
+  const dispatch = useAppDispatch();
+
   // if currentPermutation is set to -1 that means there are no permutations
   if (currentPermutation === -1) return;
   const atMaxPerm = currentPermutation + 1 === totalPermutations;
   const atMinPerm = currentPermutation === 0;
-  const dispatch = useAppDispatch();
 
   return (
     <div className="paginationContainer">

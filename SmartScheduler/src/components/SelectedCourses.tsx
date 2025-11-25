@@ -35,7 +35,7 @@ export default function SelectedCourses() {
         <ul className="courseList">
           {/* Map through the selected courses and display them here using the classCard component */}
           {selectedCourses.map((course: ClassData) => (
-            <ClassCard currCourse={course} />
+            <ClassCard currCourse={course} key={course.id}/>
           ))}
         </ul>
       </div>

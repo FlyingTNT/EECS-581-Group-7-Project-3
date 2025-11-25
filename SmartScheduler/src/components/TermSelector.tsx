@@ -52,8 +52,8 @@ export default function TermSelector() {
             onChange={event => dispatch(setCurrentTerm(Number(event.target.value)))}
             >
             {
-                options.map(option => 
-                    (<option value = {getTermCode(option.year, option.season)}>
+                options.map(option =>
+                    (<option key={option.year + option.season} value = {getTermCode(option.year, option.season)}>
                         {option.season} {option.year}
                     </option>))
             }
