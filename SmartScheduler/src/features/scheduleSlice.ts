@@ -87,17 +87,63 @@ const scheduleSlice = createSlice({
      * @param action The new permutations
      */
     reportSchedules(state, action: PayloadAction<SectionData[][]>) {
+      const currentPermutation = getCurrentPermutation(state);
+
       state.permutations = action.payload;
+
+      // If there are no permutations, exit early
       if (state.permutations.length === 0) {
         state.currentPermutation = -1;
-      } else {
-        if (
-          state.currentPermutation < 0 ||
-          state.currentPermutation >= state.permutations.length
-        ) {
-          state.currentPermutation = 0;
+        return;
+      } 
+      
+      /**
+       * Try to maximize the overlap between the old selected permutation and the new one so classes don't jump around
+       */
+
+      // The section numbers of the old permutation
+      const oldNumberSet = new Set(currentPermutation?.map(section => section.sectionNumber));
+
+      // The minimum number of classes we can expect to not overlap between the new and old permutation
+      const baseline = Math.max(state.permutations[0].length - (currentPermutation?.length ?? 0), 0);
+
+      let minMisses = Number.MAX_VALUE;
+      let minIndex = 0;
+
+      // Find the index with the least non-overlapping classes
+      outer: for(let i = 0; i < state.permutations.length; i++)
+      {
+        let misses = 0;
+
+        for(const section of state.permutations[i])
+        {
+          if(!oldNumberSet.has(section.sectionNumber))
+          {
+            misses++;
+
+            // We know this permutation isn't optimal
+            if(misses >= minMisses)
+            {
+              continue outer;
+            }
+          }
+        }
+
+        // If this permutation has the minimum possible misses, we have found the best one
+        if(misses == baseline)
+        {
+          state.currentPermutation = i;
+          return;
+        }
+
+        if(misses < minMisses)
+        {
+          minMisses = misses;
+          minIndex = i;
         }
       }
+
+      state.currentPermutation = minIndex;
     },
     togglePin(state, action: PayloadAction<number>){
       const permutation = getCurrentPermutation(state);
