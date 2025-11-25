@@ -74,8 +74,6 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
 
   // Each of the parts that display the sections and there times are lists and bulleted lists need keys for each
   // element so these two helper functions create completely unique keys for each element
-  const timeKey = (t: { day: number; startTime: number; endTime: number }) =>
-    `${t.day}-${t.startTime}-${t.endTime}`;
   const sectionKey = (type: string, sec: { sectionNumber: string | number }) =>
     `${type}-${sec.sectionNumber}`;
 
@@ -122,6 +120,24 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
     return [daysString + " " + unparseTime(start) + "-" + unparseTime(end)];
   }
 
+  function getSectionItems(sections: SectionData[])
+  {
+    return sections.map(sec => 
+      <li className="sectionItem" key={sectionKey("SEL", sec)}>
+        <div className="sectionHeader">
+          Section {sec.sectionNumber} {sec.openSeats == 0 ? "(Full)" : ""}
+        </div>
+        {/* show times or fallback text */}
+        {(sec.times ?? []).length > 0 ? (
+          <TimesList times={sec.times} />
+        ) : (
+          <ul className="timesList">
+            <li>This has no scheduled time</li>
+          </ul>
+        )}
+      </li>);
+  }
+
   return (
     <div
       className="classCardContainer"
@@ -148,21 +164,7 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
               return (
                 <div className="selectedSectionsList">
                   <ul className="sectionList">
-                    {selectedSecs.map((sec) => (
-                      <li className="sectionItem" key={sectionKey("SEL", sec)}>
-                        <div className="sectionHeader">
-                          Section {sec.sectionNumber}
-                        </div>
-                        {/* show times or fallback text */}
-                        {(sec.times ?? []).length > 0 ? (
-                          <TimesList times={sec.times} />
-                        ) : (
-                          <ul className="timesList">
-                            <li>This has no scheduled time</li>
-                          </ul>
-                        )}
-                      </li>
-                    ))}
+                    {getSectionItems(selectedSecs)}
                   </ul>
                 </div>
               );
@@ -190,21 +192,7 @@ export default function ClassCard({ currCourse }: ClassCardProps) {
               <div className={`${type.toLowerCase()}List`} key={type}>
                 <div className="sectionTypeLabel">{typeLabel}:</div>
                 <ul className="sectionList">
-                  {secs.map((sec) => (
-                    <li className="sectionItem" key={sectionKey(type, sec)}> 
-                      <div className="sectionHeader">
-                        Section {sec.sectionNumber}
-                      </div>
-                      {/* show times or fallback text */}
-                      {(sec.times ?? []).length > 0 ? (
-                        <TimesList times={sec.times} />
-                      ) : (
-                        <ul className="timesList">
-                          <li>This has no scheduled time</li>
-                        </ul>
-                      )}
-                    </li>
-                  ))}
+                  {getSectionItems(secs)}
                 </ul>
               </div>
             );
