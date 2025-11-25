@@ -13,7 +13,7 @@ import type { ClassData } from "../types";
 import "../styles/SearchBarStyles.css";
 import { useAppSelector } from "../redux/hooks";
 import { fetchCourses } from "../utils/getCourses";
-import { parseHTMLResponse } from "../utils/Utilities";
+import { getState, parseHTMLResponse } from "../utils/Utilities";
 import getCourseColor from "../utils/getCourseColor";
 
 export default function SearchBar() {
@@ -39,10 +39,12 @@ export default function SearchBar() {
     return selectedCourses.some((course) => course.id === value);
   };
 
+  const state = getState();
+
   // Use the fetchCourses utility to get the courses from the backend
   async function handleSearch(text: string): Promise<ClassData[]> {
     try {
-      const html = await fetchCourses(text);
+      const html = await fetchCourses(text, state.selectedTerm);
 
       return parseHTMLResponse(html);
 
