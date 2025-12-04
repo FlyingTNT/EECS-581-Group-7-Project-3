@@ -1,6 +1,9 @@
 # Smart Scheduler
 A web app for KU students to select courses and visualize their weekly timetable to manage their semester schedule effectively.
 
+## Presentation
+To view an in depth walk through of the website: https://drive.google.com/file/d/1AnxqndXELqRthvjsWohy9PBPrk_1b-4c/view?usp=sharing
+
 ## Installation
 To install the web server, download the [latest release](https://github.com/FlyingTNT/EECS-581-Group-7-Project-3/releases/latest) from this repository.
 
